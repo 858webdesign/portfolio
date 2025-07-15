@@ -13,32 +13,36 @@ export default async function Home() {
   const projects = await getProjects();
 
   return (
-    <main className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-4xl font-bold text-blue-700 mb-8">Projects</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {projects.map((project) => {
-          const imageUrl = project._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+  <main className="p-8 max-w-6xl mx-auto">
+  <h1 className="text-4xl font-bold text-blue-700 mb-8">My Projects</h1>
 
-          return (
-            <div key={project.id} className="border rounded-lg overflow-hidden shadow hover:shadow-md transition">
-              {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt={project.title.rendered}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <a
-                  href={`/project/${project.slug}`}
-                  className="text-lg font-semibold text-blue-600 hover:underline"
-                  dangerouslySetInnerHTML={{ __html: project.title.rendered }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </main>
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    {projects.map((project) => (
+      <a
+        key={project.id}
+        href={`/project/${project.slug}`}
+        className="block border rounded-lg overflow-hidden hover:shadow-lg transition duration-300 bg-white"
+      >
+        {project.featured_media && (
+          <img
+            src={project._embedded?.['wp:featuredmedia']?.[0]?.source_url}
+            alt={project.title.rendered}
+            className="w-full h-48 object-cover"
+          />
+        )}
+        <div className="p-4">
+          <h2
+            className="text-xl font-semibold"
+            dangerouslySetInnerHTML={{ __html: project.title.rendered }}
+          />
+          <p
+            className="text-gray-600 text-sm mt-2"
+            dangerouslySetInnerHTML={{ __html: project.excerpt.rendered }}
+          />
+        </div>
+      </a>
+    ))}
+  </div>
+</main>
   );
 }
