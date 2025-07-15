@@ -23,7 +23,9 @@ export async function generateStaticParams() {
 }
 
 export default async function ProjectPage({ params }) {
-  const project = await getProject(params.slug);
+  const { slug } = await params; // ✅ await destructure
+
+  const project = await getProject(slug);
 
   if (!project) {
     return <div className="p-6 text-red-600">Project not found.</div>;
@@ -31,14 +33,8 @@ export default async function ProjectPage({ params }) {
 
   return (
     <main className="p-6 max-w-3xl mx-auto">
-      <h1
-        className="text-3xl font-bold mb-4"
-        dangerouslySetInnerHTML={{ __html: project.title.rendered }}
-      />
-      <div
-        className="prose"
-        dangerouslySetInnerHTML={{ __html: project.content.rendered }}
-      />
+      <h1 className="text-3xl font-bold mb-4" dangerouslySetInnerHTML={{ __html: project.title.rendered }} />
+      <div className="prose" dangerouslySetInnerHTML={{ __html: project.content.rendered }} />
     </main>
   );
 }
