@@ -19,7 +19,7 @@ export default async function Home() {
     <main className="p-8 max-w-6xl mx-auto">
       <h1 className="text-4xl font-bold text-blue-700 mb-8">My Projects</h1>
 
-<div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3">
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 text-center">
         {projects.map((project) => (
           <a
             key={project.id}
