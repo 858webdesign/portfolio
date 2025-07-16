@@ -1,25 +1,22 @@
-// /src/components/DarkModeToggle.jsx
+// src/components/DarkModeToggle.jsx
 'use client';
 
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
+
 export default function DarkModeToggle() {
-  const toggleDarkMode = () => {
-    const root = document.documentElement;
-    const isDark = root.classList.contains('dark');
-    if (isDark) {
-      root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
-  };
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
 
   return (
     <button
-      onClick={toggleDarkMode}
-      className="px-4 py-2 border rounded mt-4 dark:bg-gray-700 dark:text-white"
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      className="px-4 py-2 border rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white"
     >
-      Toggle Dark Mode
+      {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
     </button>
   );
 }

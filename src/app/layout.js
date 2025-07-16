@@ -1,6 +1,6 @@
-// src/app/layout.js
+// app/layout.js
 import './globals.css';
-import DarkModeScript from '@/components/DarkModeScript';
+import ThemeWrapper from '@/components/ThemeWrapper';
 import DarkModeToggle from '@/components/DarkModeToggle';
 
 export const metadata = {
@@ -11,11 +11,19 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
-      <body className="bg-white text-black dark:bg-gray-900 dark:text-white">
-        <DarkModeScript />
-        <DarkModeToggle />
-        {children}
+      <body className="transition-colors duration-300">
+        <ThemeWrapper>
+          <main className="min-h-screen  dark:text-white">
+            <div className="p-4">
+              <DarkModeToggle />
+            </div>
+            {children}
+          </main>
+        </ThemeWrapper>
+
+       
+
+
       </body>
     </html>
   );

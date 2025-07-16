@@ -19,12 +19,14 @@ export default async function Home() {
   const projects = await getProjects();
 
   return (
-    <main className="p-8 max-w-8xl max-w-[1440px] mx-auto bg-blue-200" >     
-      <h1 className="text-4xl font-bold text-red-700 mb-8">My Projects</h1>
+    /*<main className="p-8 max-w-8xl max-w-[1440px] mx-auto bg-blue-200" >*/
+   
+    <main className="max-w-[1440px] mx-auto transition-colors duration-300">
 
+      <h1 className="text-red-700 dark-heading text-4xl font-bold mb-4">My Projects</h1>
     <style>{`
   .scroll-container {
-    height: 192px;
+    height: 292px;
     overflow: hidden;
     position: relative;
   }
@@ -42,7 +44,7 @@ export default async function Home() {
   }
 `}</style>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center">
+      <div className="grid grid-cols-1 text-black sm:grid-cols-2 md:grid-cols-3 gap-6 text-center ">
         {projects.map((project) => {
           const featuredImage = project._embedded?.['wp:featuredmedia']?.[0]?.source_url;
           const projectUrl = project.acf?.url || project.meta?.url || 'https://petereichhorst.com';
