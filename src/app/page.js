@@ -23,7 +23,7 @@ export default async function Home() {
    
     <>
 
-      <h1 className="text-red-700 dark-heading text-4xl font-bold mb-4">My Projects</h1>
+      <h1 className="text-red-700xred-heading text-3xl font-bold mb-4">My Projects</h1>
     <style>{`
   .scroll-container {
     height: 292px;

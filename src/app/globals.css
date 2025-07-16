@@ -1,11 +1,7 @@
 @import 'tailwindcss';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 
 
 /* globals.css */
-.dark .dark-heading {
+.dark .red-heading {
   @apply text-white;
 }
