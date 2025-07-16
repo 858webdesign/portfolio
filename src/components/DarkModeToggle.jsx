@@ -9,7 +9,12 @@ export default function DarkModeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
+if (!mounted) {
+  return (
+    <div className="w-[160px] h-[36px] inline-block" />
+  );
+}
+
 
   return (
     <button

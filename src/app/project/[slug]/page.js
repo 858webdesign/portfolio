@@ -32,9 +32,9 @@ export default async function ProjectPage({ params }) {
   }
 
   return (
-    <main className="p-6 max-w-7xl mx-auto">
+    <>
       <h1 className="text-3xl font-bold mb-4" dangerouslySetInnerHTML={{ __html: project.title.rendered }} />
       <div className="prose" dangerouslySetInnerHTML={{ __html: project.content.rendered }} />
-    </main>
+    </>
   );
 }

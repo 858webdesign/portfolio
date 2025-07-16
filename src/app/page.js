@@ -21,7 +21,7 @@ export default async function Home() {
   return (
     /*<main className="p-8 max-w-8xl max-w-[1440px] mx-auto bg-blue-200" >*/
    
-    <main className="max-w-[1440px] mx-auto transition-colors duration-300">
+    <>
 
       <h1 className="text-red-700 dark-heading text-4xl font-bold mb-4">My Projects</h1>
     <style>{`
@@ -60,7 +60,7 @@ export default async function Home() {
   <img
     src={previewImage}
     alt={project.title.rendered}
-    className="w-full scroll-inner"
+    className="w-full scroll-inner transform hover:scale-[1.02] transition-transform"
   />
 </div>
 
@@ -80,6 +80,6 @@ export default async function Home() {
           );
         })}
       </div>
-    </main>
+    </>
   );
 }

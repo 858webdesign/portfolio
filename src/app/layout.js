@@ -11,19 +11,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="transition-colors duration-300">
-        <ThemeWrapper>
-          <main className="min-h-screen  dark:text-white">
-            <div className="p-4">
-              <DarkModeToggle />
-            </div>
+      <body className="transition-colors duration-300 ">
+        <ThemeWrapper> <DarkModeToggle />
+          <main className="max-w-[1440px] mx-auto  duration-300">                         
             {children}
           </main>
         </ThemeWrapper>
-
-       
-
-
       </body>
     </html>
   );
