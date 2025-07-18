@@ -2,41 +2,61 @@
 
 import { useState, useEffect } from 'react';
 
-
-
-
-const grid = [
-  ['P', 'K', 'C', 'F', 'B', 'F', 'D', 'K', 'V', 'D', 'X', 'V', 'X', 'G', 'R'],
-  ['A', 'D', 'R', 'F', 'E', 'N', 'Y', 'Q', 'R', 'P', 'H', 'F', 'W', 'D', 'O'],
-  ['J', 'O', 'C', 'X', 'B', 'I', 'H', 'E', 'B', 'G', 'P', 'X', 'W', 'H', 'S'],
-  ['O', 'S', 'U', 'H', 'A', 'O', 'A', 'Z', 'P', 'S', 'Y', 'Q', 'S', 'F', 'R'],
-  ['H', 'Q', 'S', 'O', 'H', 'C', 'B', 'N', 'F', 'W', 'S', 'O', 'D', 'W', 'U'],
-  ['X', 'M', 'U', 'E', 'T', 'E', 'L', 'U', 'H', 'J', 'I', 'N', 'E', 'V', 'C'],
-  ['R', 'N', 'B', 'I', 'L', 'Y', 'Y', 'Q', 'E', 'M', 'E', 'H', 'T', 'I', 'Y'],
-  ['P', 'W', 'V', 'E', 'A', 'D', 'L', 'N', 'V', 'E', 'D', 'T', 'C', 'M', 'E'],
-  ['W', 'I', 'H', 'L', 'B', 'D', 'A', 'C', 'F', 'B', 'F', 'K', 'D', 'N', 'Z'],
-  ['E', 'R', 'K', 'V', 'I', 'X', 'N', 'E', 'U', 'M', 'U', 'Z', 'T', 'Y', 'T'],
-  ['U', 'F', 'M', 'L', 'C', 'E', 'S', 'W', 'H', 'W', 'T', 'V', 'I', 'Y', 'R'],
-  ['I', 'N', 'H', 'C', 'X', 'H', 'D', 'P', 'H', 'W', 'C', 'V', 'T', 'G', 'J'],
-  ['U', 'T', 'W', 'T', 'Q', 'E', 'M', 'H', 'F', 'H', 'Q', 'E', 'T', 'R', 'T'],
-  ['B', 'X', 'J', 'L', 'N', 'C', 'G', 'F', 'U', 'W', 'S', 'R', 'E', 'A', 'L'],
-  ['M', 'S', 'Z', 'U', 'E', 'K', 'S', 'Q', 'D', 'E', 'V', 'Q', 'R', 'J', 'S'],
-];
-
-export default function WordSearchPuzzle() {
-
 const originalWords = ['NEXTJS', 'REACT', 'HEADLESS', 'THEME', 'CURSOR'];
-const [words, setWords] = useState(() => shuffle([...originalWords]));
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+function generateGridWithWords(words, size = 15) {
+  const grid = Array.from({ length: size }, () => Array(size).fill(null));
+  const directions = [
+    [0, 1], [1, 0], [1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1], [-1, 1]
+  ];
+
+  const placeWord = (word) => {
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const dir = directions[Math.floor(Math.random() * directions.length)];
+      const row = Math.floor(Math.random() * size);
+      const col = Math.floor(Math.random() * size);
+
+      let fits = true;
+      for (let i = 0; i < word.length; i++) {
+        const r = row + dir[0] * i;
+        const c = col + dir[1] * i;
+        if (
+          r < 0 || r >= size ||
+          c < 0 || c >= size ||
+          (grid[r][c] !== null && grid[r][c] !== word[i])
+        ) {
+          fits = false;
+          break;
+        }
+      }
+      if (!fits) continue;
+
+      for (let i = 0; i < word.length; i++) {
+        const r = row + dir[0] * i;
+        const c = col + dir[1] * i;
+        grid[r][c] = word[i];
+      }
+      return true;
+    }
+    return false;
+  };
+
+  words.forEach(placeWord);
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if (grid[r][c] === null) {
+        grid[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      }
+    }
   }
-  return arr;
+
+  return grid;
 }
 
-
+export default function WordSearchPuzzle() {
+  const [words, setWords] = useState(originalWords);
+  const [grid, setGrid] = useState(() => generateGridWithWords(words));
   const [foundWords, setFoundWords] = useState([]);
   const [highlightedCells, setHighlightedCells] = useState([]);
   const [selectedCells, setSelectedCells] = useState([]);
@@ -49,9 +69,10 @@ function shuffle(arr) {
     if (foundWords.length === words.length) {
       setGameComplete(true);
       setTimeout(() => {
-         setWords(shuffle([...originalWords])); // ✅ Re-randomize on reset
         setFoundWords([]);
         setHighlightedCells([]);
+        setWords(originalWords);
+        setGrid(generateGridWithWords(originalWords));
         setGameComplete(false);
       }, 2500);
     }
@@ -95,13 +116,11 @@ function shuffle(arr) {
   const checkSelectedWord = () => {
     const selectedWord = selectedCells.map(({ row, col }) => grid[row][col]).join('');
     const reversed = selectedWord.split('').reverse().join('');
-    const matched = words.find(
-      (word) => word === selectedWord || word === reversed
-    );
+    const matched = words.find(word => word === selectedWord || word === reversed);
 
     if (matched && !foundWords.includes(matched)) {
-      setFoundWords((prev) => [...prev, matched]);
-      setHighlightedCells((prev) => [...prev, ...selectedCells]);
+      setFoundWords(prev => [...prev, matched]);
+      setHighlightedCells(prev => [...prev, ...selectedCells]);
       setRecentlyFound(matched);
       setTimeout(() => setRecentlyFound(null), 600);
     }
@@ -109,17 +128,15 @@ function shuffle(arr) {
     setSelectedCells([]);
   };
 
-  const isSelected = (row, col) =>
-    selectedCells.some((cell) => cell.row === row && cell.col === col);
-
+  const isSelected = (row, col) => selectedCells.some(cell => cell.row === row && cell.col === col);
   const isHighlighted = (row, col) =>
-    highlightedCells.some((cell) => cell.row === row && cell.col === col) ||
-    tempHighlight.some((cell) => cell.row === row && cell.col === col);
+    highlightedCells.some(cell => cell.row === row && cell.col === col) ||
+    tempHighlight.some(cell => cell.row === row && cell.col === col);
 
   const handleWordClick = (word) => {
     const directions = [
       [0, 1], [1, 0], [1, 1], [-1, 0],
-      [0, -1], [-1, -1], [1, -1], [-1, 1],
+      [0, -1], [-1, -1], [1, -1], [-1, 1]
     ];
 
     for (let row = 0; row < grid.length; row++) {
@@ -149,14 +166,13 @@ function shuffle(arr) {
 
   return (
     <div className="mx-auto p-4 text-center select-none relative">
-      <h2 className="text-xl font-bold mb-2">Word Search</h2>
+      <h2 className="text-xl font-bold mb-2">Word Search:</h2>
 
       <div className="flex justify-center">
         <div
           className="grid aspect-square gap-[1px] bg-gray-300 w-[clamp(300px,80vmin,600px)]"
           style={{ gridTemplateColumns: `repeat(${grid[0].length}, 1fr)` }}
-          onMouseLeave={() => setIsSelecting(false)}
-          onMouseDown={(e) => e.preventDefault()}
+          onTouchStart={(e) => e.preventDefault()}
         >
           {grid.map((row, rowIndex) =>
             row.map((letter, colIndex) => {
@@ -165,15 +181,8 @@ function shuffle(arr) {
               return (
                 <div
                   key={`${rowIndex}-${colIndex}`}
-                  className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer text-[12px] md:text-[14px]
-                    ${
-                      highlighted
-                        ? 'bg-green-500 text-white'
-                        : selected
-                        ? 'bg-yellow-300 text-black'
-                        : 'bg-[var(--color-bg)] text-[var(--color-text)]'
-                    }
-                  `}
+                  className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[12px] md:text-[14px]
+                    ${highlighted ? 'bg-green-500 text-white' : selected ? 'bg-yellow-300 text-black' : 'bg-[var(--color-bg)] text-[var(--color-text)]'}`}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     startSelection(rowIndex, colIndex);
@@ -182,6 +191,17 @@ function shuffle(arr) {
                     if (isSelecting) updateSelection(rowIndex, colIndex);
                   }}
                   onMouseUp={endSelection}
+                  onTouchStart={() => startSelection(rowIndex, colIndex)}
+                  onTouchMove={(e) => {
+                    const touch = e.touches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    if (target?.dataset?.cell) {
+                      const [r, c] = target.dataset.cell.split('-').map(Number);
+                      updateSelection(r, c);
+                    }
+                  }}
+                  onTouchEnd={endSelection}
+                  data-cell={`${rowIndex}-${colIndex}`}
                 >
                   {letter}
                 </div>
@@ -198,8 +218,7 @@ function shuffle(arr) {
             onClick={() => handleWordClick(word)}
             className={`px-2 py-1 border rounded transition-all duration-200
               ${foundWords.includes(word) ? 'bg-green-600 text-white' : 'bg-gray-200 text-black'}
-              ${recentlyFound === word ? 'animate-ping ring ring-green-400' : ''}
-            `}
+              ${recentlyFound === word ? 'animate-ping ring ring-green-400' : ''}`}
           >
             {word}
           </button>
