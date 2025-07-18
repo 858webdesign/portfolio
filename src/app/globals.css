@@ -83,3 +83,13 @@ body {
   --tw-prose-bullets: var(--color-accent);
   --tw-prose-quotes: var(--color-accent);
 }
+
+
+@keyframes flash-border {
+  0% {
+    box-shadow: 0 0 0 3px #4ade80;
+  }
+  100% {
+    box-shadow: 0 0 0 0px transparent;
+  }
+}

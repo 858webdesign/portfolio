@@ -44,7 +44,7 @@ export default function Footer() {
       </div>
 
  <div>
-      <h1 className="text-2xl mb-4">Try This Puzzle</h1>
+      <h1 className="text-2xl mb-4 text-center">Try This Puzzle</h1>
       <WordSearchPuzzle />
     </div>
 
