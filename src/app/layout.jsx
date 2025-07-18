@@ -3,7 +3,7 @@
 
 import './globals.css';
 import ThemeWrapper from '@/components/ThemeWrapper';
-import DarkModeToggle from '../components/DarkModeToggle';
+import DarkModeToggle from '@/components/DarkModeToggle';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx'; // optional, or use inline logic

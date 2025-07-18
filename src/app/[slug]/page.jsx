@@ -2,7 +2,6 @@
 
 // ❗️ This line ensures the route is treated as dynamic
 export const dynamic = 'force-dynamic';
-
 import { getMetadata } from '@/lib/getMetadata';
 
 // ✅ params is a plain object — do NOT await it

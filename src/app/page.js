@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getMetadata } from '../lib/getMetadata';
+import { getMetadata } from '@/lib/getMetadata';
 
 export async function generateMetadata() {
   return await getMetadata('home');

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { getMetadata } from '../lib/getMetadata';
+import { getMetadata } from '@/lib/getMetadata';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params; // ✅ Must await params
