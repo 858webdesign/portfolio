@@ -31,7 +31,7 @@ export default async function Page({ params }) {
     : [];
 
   return (
-    <div className="p-8">
+    <div className="cursor-none">
       {/* ✅ Page Title */}
       <h1 className="text-4xl font-bold mb-6">
         {page.title?.rendered || 'Untitled'}

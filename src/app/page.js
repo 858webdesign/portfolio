@@ -21,12 +21,18 @@ function getScreenshotUrl(siteUrl) {
   return `${base}?token=${token}&url=${encodeURIComponent(siteUrl)}&output=image&file_type=png&full_page=true`;
 }
 
+function getRandomFallbackImage() {
+  // Returns a random 600x400 image
+  const randomId = Math.floor(Math.random() * 1000);
+  return `https://picsum.photos/seed/${randomId}/600/800`;
+}
+
 export default async function HomePage() {
   const projects = await getProjects();
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-4 text-red-700">My Projects</h1>
+      <h1 className="text-3xl font-bold mb-4 text-700">My Projects</h1>
 
       <style>{`
         .scroll-container {
@@ -51,8 +57,9 @@ export default async function HomePage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center text-black">
         {projects.map((project) => {
           const featuredImage = project._embedded?.['wp:featuredmedia']?.[0]?.source_url;
-          const projectUrl = project.acf?.url || project.meta?.url || 'https://petereichhorst.com';
-          const previewImage = featuredImage || getScreenshotUrl(projectUrl);
+          const projectUrl = project.acf?.url || project.meta?.url;
+          const screenshot = projectUrl ? getScreenshotUrl(projectUrl) : null;
+          const previewImage = featuredImage || screenshot || getRandomFallbackImage();
 
           return (
             <Link

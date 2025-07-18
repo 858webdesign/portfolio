@@ -5,3 +5,53 @@
 .dark .red-heading {
   @apply text-white;
 }
+
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-spin-slow {
+  /*animation: spin-slow 2s linear infinite;*/
+}
+
+
+body,
+a,
+button,
+input,
+textarea {
+  cursor: none !important;
+}
+
+main * {
+  cursor: none !important;
+}
+
+
+
+* {
+  cursor: none !important;
+}
+/* Hide system cursor globally */
+/* globals.css */
+html, body {
+  cursor: none;
+}
+
+/* Show system cursor on interactive elements */
+/* Hide default cursor globally */
+*,
+a,
+button,
+input,
+textarea,
+select,
+[role="button"] {
+  cursor: none !important;
+}

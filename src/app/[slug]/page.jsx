@@ -1,10 +1,8 @@
 // app/[slug]/page.jsx
-
-// ❗️ This line ensures the route is treated as dynamic
 export const dynamic = 'force-dynamic';
+import Link from 'next/link';
 import { getMetadata } from '@/lib/getMetadata';
 
-// ✅ params is a plain object — do NOT await it
 export async function generateMetadata({ params }) {
   const slug = params?.slug || 'home';
   return await getMetadata(slug);
@@ -13,7 +11,7 @@ export async function generateMetadata({ params }) {
 async function getPageBySlug(slug) {
   const res = await fetch(
     `https://backend.petereichhorst.com/wp-json/wp/v2/pages?slug=${slug}&acf_format=standard`,
-    { next: { revalidate: 60 } } // ISR
+    { next: { revalidate: 60 } }
   );
   const data = await res.json();
   return Array.isArray(data) && data.length > 0 ? data[0] : null;
@@ -28,19 +26,17 @@ export default async function Page({ params }) {
   }
 
   const blocks = Array.isArray(page.acf?.builder?.value_formatted)
-    ? page.acf.builder.value_formatted.filter(
-        (block) => block.acf_fc_layout !== 'hero'
-      )
+    ? page.acf.builder.value_formatted
     : [];
 
   return (
-    <>
-      {blocks.map((block, i) => {
-        switch (block.acf_fc_layout) {
-          default:
-            return null;
-        }
-      })}
+    <><div className="min-h-screen cursor-none relative">
+      <h1 className="text-3xl font-bold mb-6">{page.title.rendered}</h1>
+<Link href="/contact" className="text-blue-600 underline">Contact</Link>
+      <div className="prose max-w-none text-black dark:text-white">
+        <div dangerouslySetInnerHTML={{ __html: page.content.rendered }} />
+      </div>
+      </div>
     </>
   );
 }
