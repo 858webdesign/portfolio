@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 
+
+
+
 export default function Header() {
   const pathname = usePathname();
   const [navLinks, setNavLinks] = useState([]);
@@ -30,7 +33,7 @@ export default function Header() {
 
     fetchPages();
   }, []);
-
+  
   return (
     <header className="bg-gray-100 shadow-md p-4">
       <nav className="max-w-[1440px] mx-auto flex justify-between items-center">
