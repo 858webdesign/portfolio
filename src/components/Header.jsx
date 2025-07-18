@@ -33,11 +33,13 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-gray-100 shadow-md p-4">
+    <header className="bg-gray-100s shadow-md p-4">
       <nav className="max-w-[1440px] mx-auto flex justify-between items-center">
-        <Link href="/" className="text-lg font-bold dark:text-black">
-          Peter EIchhorst's Porfolio
+        <Link href="/" className="text-lg font-bold">
+          <h1 className="text-xl text-[var(--color-accent)]">Welcome</h1>
+
         </Link>
+        <p className="text-base-text bg-base-bg">Welcome</p>
         <div className="space-x-4">
           {navLinks.map(({ href, label }) => {
             const isActive =
@@ -45,17 +47,18 @@ export default function Header() {
 
             return (
               <Link
-                key={href}
-                href={href}
-                className={clsx(
-                  'relative px-1 pb-1 transition-colors',
-                  isActive
-                    ? 'text-blue-600 font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-blue-600'
-                    : 'text-gray-700 hover:text-blue-500'
-                )}
-              >
-                {label}
-              </Link>
+  key={href}
+  href={href}
+  className={clsx(
+    'relative px-1 pb-1 transition-colors',
+    isActive
+      ? 'text-[var(--color-accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--color-accent)]'
+      : 'text-[var(--color-text)] hover:text-[var(--color-accent)]'
+  )}
+>
+  {label}
+</Link>
+
             );
           })}
         </div>

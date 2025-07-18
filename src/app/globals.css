@@ -55,3 +55,31 @@ select,
 [role="button"] {
   cursor: none !important;
 }
+:root {
+  /* Default Theme — "Retro" */
+  --color-bg: #ffffff;            /* white background */
+  --color-accent: #e35205;        /* orange */
+  --color-text: #002d62;          /* navy */
+}
+
+[data-theme='alt'] {
+  /* Alternate Theme — "Current" */
+  --color-bg: #2f241d;            /* dark brown */
+  --color-accent: #ffc425;        /* yellow */
+  --color-text: var(--color-accent); /* yellow text */
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Tailwind Typography override */
+.prose {
+  --tw-prose-body: var(--color-text);
+  --tw-prose-headings: var(--color-accent);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bullets: var(--color-accent);
+  --tw-prose-quotes: var(--color-accent);
+}

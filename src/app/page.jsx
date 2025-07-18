@@ -24,7 +24,7 @@ function getScreenshotUrl(siteUrl) {
 function getRandomFallbackImage() {
   // Returns a random 600x400 image
   const randomId = Math.floor(Math.random() * 1000);
-  return `https://picsum.photos/seed/${randomId}/600/800`;
+  return `https://picsum.photos/seed/${randomId}/600/700`;
 }
 
 export default async function HomePage() {
