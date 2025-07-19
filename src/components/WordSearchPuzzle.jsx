@@ -181,9 +181,9 @@ export default function WordSearchPuzzle() {
     <div className="mx-auto p-4 text-center select-none relative">
       <h2 className="text-xl font-bold mb-2">Word Search:</h2>
       <div className="flex justify-center">
-        <div className="w-full max-w-[600px] overflow-x-auto">
+        <div className="w-full max-w-[600px]">
           <div
-            className="grid aspect-square gap-[1px] bg-gray-300 w-full border border-gray-300"
+            className="grid aspect-square gap-[1px] bg-gray-300 w-full border border-gray-300 max-w-full"
             style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 15}, 1fr)` }}
             onTouchStart={(e) => e.preventDefault()}
           >
