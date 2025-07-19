@@ -2,61 +2,29 @@
 
 import { useState, useEffect } from 'react';
 
-const originalWords = ['NEXTJS', 'REACT', 'HEADLESS', 'THEME', 'CURSOR'];
+const commonWordPool = [
+  'APPLE', 'BANANA', 'ORANGE', 'CHAIR', 'TABLE', 'WINDOW', 'MOUNTAIN', 'RIVER',
+  'OCEAN', 'TREE', 'HOUSE', 'CANDLE', 'PENCIL', 'PAPER', 'LADDER', 'BUTTON',
+  'CLOCK', 'MIRROR', 'WATER', 'SNOW', 'RAIN', 'THUNDER', 'STORM', 'CLOUD',
+  'BRIDGE', 'CARPET', 'DESK', 'WALL', 'FLOOR', 'BOTTLE', 'TOOTH', 'SHOE',
+  'PLANE', 'TRAIN', 'CUP', 'PLATE', 'KNIFE', 'FORK', 'SPOON', 'GLASS',
+  'MUSIC', 'GUITAR', 'PIANO', 'VIOLIN', 'DRUM', 'HORSE', 'ZEBRA', 'ELEPHANT',
+  'TIGER', 'LION', 'BEAR', 'FOX', 'SNAKE', 'FISH', 'BIRD', 'DUCK', 'FROG',
+  'GARDEN', 'FLOWER', 'ROSE', 'DAISY', 'GRASS', 'LEAF', 'STONE', 'SAND',
+  'BEACH', 'ISLAND', 'SUNSET', 'SUNRISE', 'STAR', 'MOON', 'PLANET', 'SPACE',
+  'CLOUD', 'SKY', 'BREEZE', 'FOREST', 'JUNGLE', 'FIELD', 'VALLEY', 'CAVE',
+  'FIRE', 'ASHES', 'SMOKE', 'WIND', 'WAVE', 'SHELL', 'BRANCH', 'ROOT', 'TRUNK',
+  'BARK', 'PATH', 'ROAD', 'TRAIL', 'MAP', 'SIGN', 'ROCK', 'MUD', 'PEBBLE'
+];
 
-function generateGridWithWords(words, size = 15) {
-  const grid = Array.from({ length: size }, () => Array(size).fill(null));
-  const directions = [
-    [0, 1], [1, 0], [1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1], [-1, 1]
-  ];
-
-  const placeWord = (word) => {
-    for (let attempt = 0; attempt < 100; attempt++) {
-      const dir = directions[Math.floor(Math.random() * directions.length)];
-      const row = Math.floor(Math.random() * size);
-      const col = Math.floor(Math.random() * size);
-
-      let fits = true;
-      for (let i = 0; i < word.length; i++) {
-        const r = row + dir[0] * i;
-        const c = col + dir[1] * i;
-        if (
-          r < 0 || r >= size ||
-          c < 0 || c >= size ||
-          (grid[r][c] !== null && grid[r][c] !== word[i])
-        ) {
-          fits = false;
-          break;
-        }
-      }
-      if (!fits) continue;
-
-      for (let i = 0; i < word.length; i++) {
-        const r = row + dir[0] * i;
-        const c = col + dir[1] * i;
-        grid[r][c] = word[i];
-      }
-      return true;
-    }
-    return false;
-  };
-
-  words.forEach(placeWord);
-
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if (grid[r][c] === null) {
-        grid[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      }
-    }
-  }
-
-  return grid;
+function getRandomWords(pool, count) {
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
 }
 
 export default function WordSearchPuzzle() {
-  const [words, setWords] = useState(originalWords);
-  const [grid, setGrid] = useState(() => generateGridWithWords(words));
+  const [words, setWords] = useState([]);
+  const [grid, setGrid] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
   const [highlightedCells, setHighlightedCells] = useState([]);
   const [selectedCells, setSelectedCells] = useState([]);
@@ -66,17 +34,74 @@ export default function WordSearchPuzzle() {
   const [gameComplete, setGameComplete] = useState(false);
 
   useEffect(() => {
-    if (foundWords.length === words.length) {
+    const newWords = getRandomWords(commonWordPool, 5);
+    setWords(newWords);
+    setGrid(generateGridWithWords(newWords));
+  }, []);
+
+  useEffect(() => {
+    if (foundWords.length === words.length && words.length > 0) {
       setGameComplete(true);
       setTimeout(() => {
+        const newWords = getRandomWords(commonWordPool, 5);
+        setWords(newWords);
+        setGrid(generateGridWithWords(newWords));
         setFoundWords([]);
         setHighlightedCells([]);
-        setWords(originalWords);
-        setGrid(generateGridWithWords(originalWords));
         setGameComplete(false);
       }, 2500);
     }
   }, [foundWords]);
+
+  const generateGridWithWords = (words, size = 15) => {
+    const grid = Array.from({ length: size }, () => Array(size).fill(null));
+    const directions = [
+      [0, 1], [1, 0], [1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1], [-1, 1]
+    ];
+
+    const placeWord = (word) => {
+      for (let attempt = 0; attempt < 100; attempt++) {
+        const dir = directions[Math.floor(Math.random() * directions.length)];
+        const row = Math.floor(Math.random() * size);
+        const col = Math.floor(Math.random() * size);
+
+        let fits = true;
+        for (let i = 0; i < word.length; i++) {
+          const r = row + dir[0] * i;
+          const c = col + dir[1] * i;
+          if (
+            r < 0 || r >= size ||
+            c < 0 || c >= size ||
+            (grid[r][c] !== null && grid[r][c] !== word[i])
+          ) {
+            fits = false;
+            break;
+          }
+        }
+        if (!fits) continue;
+
+        for (let i = 0; i < word.length; i++) {
+          const r = row + dir[0] * i;
+          const c = col + dir[1] * i;
+          grid[r][c] = word[i];
+        }
+        return true;
+      }
+      return false;
+    };
+
+    words.forEach(placeWord);
+
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (grid[r][c] === null) {
+          grid[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        }
+      }
+    }
+
+    return grid;
+  };
 
   const startSelection = (row, col) => {
     setIsSelecting(true);
@@ -85,18 +110,14 @@ export default function WordSearchPuzzle() {
 
   const updateSelection = (row, col) => {
     if (!isSelecting || selectedCells.length === 0) return;
-
     const start = selectedCells[0];
     const dr = row - start.row;
     const dc = col - start.col;
     const steps = Math.max(Math.abs(dr), Math.abs(dc));
     if (steps === 0) return;
-
     const dirR = dr / steps;
     const dirC = dc / steps;
-
     if (!Number.isInteger(dirR) || !Number.isInteger(dirC)) return;
-
     const newSelection = [];
     for (let i = 0; i <= steps; i++) {
       const r = start.row + dirR * i;
@@ -104,7 +125,6 @@ export default function WordSearchPuzzle() {
       if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length) return;
       newSelection.push({ row: r, col: c });
     }
-
     setSelectedCells(newSelection);
   };
 
@@ -124,7 +144,6 @@ export default function WordSearchPuzzle() {
       setRecentlyFound(matched);
       setTimeout(() => setRecentlyFound(null), 600);
     }
-
     setSelectedCells([]);
   };
 
@@ -167,11 +186,10 @@ export default function WordSearchPuzzle() {
   return (
     <div className="mx-auto p-4 text-center select-none relative">
       <h2 className="text-xl font-bold mb-2">Word Search:</h2>
-
       <div className="flex justify-center">
         <div
           className="grid aspect-square gap-[1px] bg-gray-300 w-[clamp(300px,80vmin,600px)]"
-          style={{ gridTemplateColumns: `repeat(${grid[0].length}, 1fr)` }}
+          style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 15}, 1fr)` }}
           onTouchStart={(e) => e.preventDefault()}
         >
           {grid.map((row, rowIndex) =>
@@ -181,7 +199,7 @@ export default function WordSearchPuzzle() {
               return (
                 <div
                   key={`${rowIndex}-${colIndex}`}
-                  className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[15px] md:text-[16px]
+                  className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[20px] md:text-[26px]
                     ${highlighted ? 'bg-green-500 text-white' : selected ? 'bg-yellow-300 text-black' : 'bg-[var(--color-bg)] text-[var(--color-text)]'}`}
                   onMouseDown={(e) => {
                     e.preventDefault();

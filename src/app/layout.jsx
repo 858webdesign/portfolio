@@ -35,8 +35,9 @@ export default function RootLayout({ children }) {
               <Footer />
           </div>          
           {/* ✅ Footer goes here */}       
-        
-    <WordSearchPuzzle />
+         <div className="max-w-[1440px] pb-20 mx-auto px-4 pt-6 cursor-none">
+         <WordSearchPuzzle  />
+         </div>
         </ThemeWrapper>
       </body>
     </html>
