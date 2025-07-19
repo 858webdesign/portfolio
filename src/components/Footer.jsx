@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import WordSearchPuzzle from '@/components/WordSearchPuzzle';
+
 
 export default function Footer() {
   const [widgets, setWidgets] = useState([]);
@@ -36,7 +36,7 @@ export default function Footer() {
   const gridClass = `grid grid-cols-1 ${colMap[widgets.length] || 'sm:grid-cols-1'} gap-6`;
 
   return (
-    <footer className="bg-[var(--color-bg)] text-[var(--color-text)] p-8">
+    <footer className="bg-[var(--color-bg)] text-[var(--color-text)] p-38">
       <div className={gridClass}>
         {widgets.map((block, idx) => (
           <div key={idx} dangerouslySetInnerHTML={{ __html: block }} />
@@ -44,10 +44,9 @@ export default function Footer() {
       </div>
 
  <div>
-      <h1 className="text-2xl mb-4 text-center">Try This Puzzle</h1>
-      <WordSearchPuzzle />
+   
     </div>
-
+   
     </footer>
   );
 }

@@ -181,7 +181,7 @@ export default function WordSearchPuzzle() {
               return (
                 <div
                   key={`${rowIndex}-${colIndex}`}
-                  className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[12px] md:text-[14px]
+                  className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[15px] md:text-[16px]
                     ${highlighted ? 'bg-green-500 text-white' : selected ? 'bg-yellow-300 text-black' : 'bg-[var(--color-bg)] text-[var(--color-text)]'}`}
                   onMouseDown={(e) => {
                     e.preventDefault();

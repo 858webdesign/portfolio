@@ -7,6 +7,7 @@ import ThemeWrapper from '@/components/ThemeWrapper';
 import ThemeToggle from '@/components/ThemeToggle';
 import CustomCursor from '@/components/CustomCursor';
 import Footer from '@/components/Footer'; // ✅ Import
+import WordSearchPuzzle from '@/components/WordSearchPuzzle';
 
 export default function RootLayout({ children }) {
   const [theme, setTheme] = useState('default');
@@ -32,11 +33,10 @@ export default function RootLayout({ children }) {
             </div>
             <main>{children}</main>
               <Footer />
-          </div>
-          
-          {/* ✅ Footer goes here */}
+          </div>          
+          {/* ✅ Footer goes here */}       
         
-
+    <WordSearchPuzzle />
         </ThemeWrapper>
       </body>
     </html>
