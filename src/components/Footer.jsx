@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-
+import WordSearchPuzzle from '@/components/WordSearchPuzzle';
 
 export default function Footer() {
   const [widgets, setWidgets] = useState([]);
@@ -42,7 +42,9 @@ export default function Footer() {
           <div key={idx} dangerouslySetInnerHTML={{ __html: block }} />
         ))}
       </div>
-
+        
+                 <WordSearchPuzzle  />
+              
  <div>
    
     </div>
