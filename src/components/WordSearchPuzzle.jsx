@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 
-
-
 const commonWordPool = [
   'APPLE', 'BANANA', 'ORANGE', 'CHAIR', 'TABLE', 'WINDOW', 'MOUNTAIN', 'RIVER',
   'OCEAN', 'TREE', 'HOUSE', 'CANDLE', 'PENCIL', 'PAPER', 'LADDER', 'BUTTON',
@@ -24,62 +22,8 @@ function getRandomWords(pool, count) {
   return shuffled.slice(0, count);
 }
 
-const originalWords = getRandomWords(commonWordPool, 5);
-
-
-
-function generateGridWithWords(words, size = 15) {
-  const grid = Array.from({ length: size }, () => Array(size).fill(null));
-  const directions = [
-    [0, 1], [1, 0], [1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1], [-1, 1]
-  ];
-
-  const placeWord = (word) => {
-    for (let attempt = 0; attempt < 100; attempt++) {
-      const dir = directions[Math.floor(Math.random() * directions.length)];
-      const row = Math.floor(Math.random() * size);
-      const col = Math.floor(Math.random() * size);
-
-      let fits = true;
-      for (let i = 0; i < word.length; i++) {
-        const r = row + dir[0] * i;
-        const c = col + dir[1] * i;
-        if (
-          r < 0 || r >= size ||
-          c < 0 || c >= size ||
-          (grid[r][c] !== null && grid[r][c] !== word[i])
-        ) {
-          fits = false;
-          break;
-        }
-      }
-      if (!fits) continue;
- 
-      for (let i = 0; i < word.length; i++) {
-        const r = row + dir[0] * i;
-        const c = col + dir[1] * i;
-        grid[r][c] = word[i];
-      }
-      return true;
-    }
-    return false;
-  };
-
-  words.forEach(placeWord);
-
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if (grid[r][c] === null) {
-        grid[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      }
-    }
-  }
-
-  return grid;
-}
-
 export default function WordSearchPuzzle() {
-  const [words, setWords] = useState(originalWords);
+  const [words, setWords] = useState(() => getRandomWords(commonWordPool, 5));
   const [grid, setGrid] = useState(() => generateGridWithWords(words));
   const [foundWords, setFoundWords] = useState([]);
   const [highlightedCells, setHighlightedCells] = useState([]);
@@ -90,17 +34,68 @@ export default function WordSearchPuzzle() {
   const [gameComplete, setGameComplete] = useState(false);
 
   useEffect(() => {
-    if (foundWords.length === words.length) {
+    if (foundWords.length === words.length && words.length > 0) {
       setGameComplete(true);
       setTimeout(() => {
+        const newWords = getRandomWords(commonWordPool, 5);
+        setWords(newWords);
+        setGrid(generateGridWithWords(newWords));
         setFoundWords([]);
         setHighlightedCells([]);
-        setWords(originalWords);
-        setGrid(generateGridWithWords(originalWords));
         setGameComplete(false);
       }, 2500);
     }
   }, [foundWords]);
+
+  function generateGridWithWords(words, size = 15) {
+    const grid = Array.from({ length: size }, () => Array(size).fill(null));
+    const directions = [
+      [0, 1], [1, 0], [1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1], [-1, 1]
+    ];
+
+    const placeWord = (word) => {
+      for (let attempt = 0; attempt < 100; attempt++) {
+        const dir = directions[Math.floor(Math.random() * directions.length)];
+        const row = Math.floor(Math.random() * size);
+        const col = Math.floor(Math.random() * size);
+
+        let fits = true;
+        for (let i = 0; i < word.length; i++) {
+          const r = row + dir[0] * i;
+          const c = col + dir[1] * i;
+          if (
+            r < 0 || r >= size ||
+            c < 0 || c >= size ||
+            (grid[r][c] !== null && grid[r][c] !== word[i])
+          ) {
+            fits = false;
+            break;
+          }
+        }
+        if (!fits) continue;
+
+        for (let i = 0; i < word.length; i++) {
+          const r = row + dir[0] * i;
+          const c = col + dir[1] * i;
+          grid[r][c] = word[i];
+        }
+        return true;
+      }
+      return false;
+    };
+
+    words.forEach(placeWord);
+
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (grid[r][c] === null) {
+          grid[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        }
+      }
+    }
+
+    return grid;
+  }
 
   const startSelection = (row, col) => {
     setIsSelecting(true);
@@ -109,18 +104,14 @@ export default function WordSearchPuzzle() {
 
   const updateSelection = (row, col) => {
     if (!isSelecting || selectedCells.length === 0) return;
-
     const start = selectedCells[0];
     const dr = row - start.row;
     const dc = col - start.col;
     const steps = Math.max(Math.abs(dr), Math.abs(dc));
     if (steps === 0) return;
-
     const dirR = dr / steps;
     const dirC = dc / steps;
-
     if (!Number.isInteger(dirR) || !Number.isInteger(dirC)) return;
-
     const newSelection = [];
     for (let i = 0; i <= steps; i++) {
       const r = start.row + dirR * i;
@@ -128,7 +119,6 @@ export default function WordSearchPuzzle() {
       if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length) return;
       newSelection.push({ row: r, col: c });
     }
-
     setSelectedCells(newSelection);
   };
 
@@ -148,7 +138,6 @@ export default function WordSearchPuzzle() {
       setRecentlyFound(matched);
       setTimeout(() => setRecentlyFound(null), 600);
     }
-
     setSelectedCells([]);
   };
 
@@ -191,47 +180,48 @@ export default function WordSearchPuzzle() {
   return (
     <div className="mx-auto p-4 text-center select-none relative">
       <h2 className="text-xl font-bold mb-2">Word Search:</h2>
-
       <div className="flex justify-center">
-        <div
-          className="grid aspect-square gap-[1px] bg-gray-300 w-[clamp(300px,80vmin,600px)]"
-          style={{ gridTemplateColumns: `repeat(${grid[0].length}, 1fr)` }}
-          onTouchStart={(e) => e.preventDefault()}
-        >
-          {grid.map((row, rowIndex) =>
-            row.map((letter, colIndex) => {
-              const selected = isSelected(rowIndex, colIndex);
-              const highlighted = isHighlighted(rowIndex, colIndex);
-              return (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[20px] md:text-[26px]
-                    ${highlighted ? 'bg-green-500 text-white' : selected ? 'bg-yellow-300 text-black' : 'bg-[var(--color-bg)] text-[var(--color-text)]'}`}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    startSelection(rowIndex, colIndex);
-                  }}
-                  onMouseMove={() => {
-                    if (isSelecting) updateSelection(rowIndex, colIndex);
-                  }}
-                  onMouseUp={endSelection}
-                  onTouchStart={() => startSelection(rowIndex, colIndex)}
-                  onTouchMove={(e) => {
-                    const touch = e.touches[0];
-                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                    if (target?.dataset?.cell) {
-                      const [r, c] = target.dataset.cell.split('-').map(Number);
-                      updateSelection(r, c);
-                    }
-                  }}
-                  onTouchEnd={endSelection}
-                  data-cell={`${rowIndex}-${colIndex}`}
-                >
-                  {letter}
-                </div>
-              );
-            })
-          )}
+        <div className="w-full max-w-[600px] overflow-x-auto">
+          <div
+            className="grid aspect-square gap-[1px] bg-gray-300 w-full border border-gray-300"
+            style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 15}, 1fr)` }}
+            onTouchStart={(e) => e.preventDefault()}
+          >
+            {grid.map((row, rowIndex) =>
+              row.map((letter, colIndex) => {
+                const selected = isSelected(rowIndex, colIndex);
+                const highlighted = isHighlighted(rowIndex, colIndex);
+                return (
+                  <div
+                    key={`${rowIndex}-${colIndex}`}
+                    className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[20px] md:text-[26px]
+                      ${highlighted ? 'bg-green-500 text-white' : selected ? 'bg-yellow-300 text-black' : 'bg-[var(--color-bg)] text-[var(--color-text)]'}`}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      startSelection(rowIndex, colIndex);
+                    }}
+                    onMouseMove={() => {
+                      if (isSelecting) updateSelection(rowIndex, colIndex);
+                    }}
+                    onMouseUp={endSelection}
+                    onTouchStart={() => startSelection(rowIndex, colIndex)}
+                    onTouchMove={(e) => {
+                      const touch = e.touches[0];
+                      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                      if (target?.dataset?.cell) {
+                        const [r, c] = target.dataset.cell.split('-').map(Number);
+                        updateSelection(r, c);
+                      }
+                    }}
+                    onTouchEnd={endSelection}
+                    data-cell={`${rowIndex}-${colIndex}`}
+                  >
+                    {letter}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
 
