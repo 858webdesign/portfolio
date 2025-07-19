@@ -184,7 +184,7 @@ export default function WordSearchPuzzle() {
         <div className="w-full max-w-[600px]">
           <div
             className="grid aspect-square gap-[1px] bg-gray-300 w-full border border-gray-300 max-w-full"
-            style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 15}, 1fr)` }}
+            style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 15}, 1fr)`, height: '100vw', maxHeight: '600px' }}
             onTouchStart={(e) => e.preventDefault()}
           >
             {grid.map((row, rowIndex) =>
