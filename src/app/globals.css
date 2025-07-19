@@ -93,3 +93,10 @@ body {
     box-shadow: 0 0 0 0px transparent;
   }
 }
+
+
+@media (hover: none) and (pointer: coarse) {
+  .custom-cursor {
+    display: none !important;
+  }
+}
