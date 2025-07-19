@@ -185,7 +185,7 @@ export default function WordSearchPuzzle() {
 
   return (
     <div className="mx-auto p-4 text-center select-none relative">
-      <h2 className="text-xl font-bold mb-2">Word Search</h2>
+      <h2 className="text-xl font-bold mb-2">Word Searc</h2>
       <div className="flex justify-center">
         <div className="w-full max-w-[600px] overflow-x-auto">
           <div
