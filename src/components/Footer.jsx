@@ -36,19 +36,18 @@ export default function Footer() {
   const gridClass = `grid grid-cols-1 ${colMap[widgets.length] || 'sm:grid-cols-1'} gap-6`;
 
   return (
-    <footer className="bg-[var(--color-bg)] text-[var(--color-text)] p-38">
+    <footer className="bg-[var(--color-bg)] text-[var(--color-text)] p-8">
       <div className={gridClass}>
         {widgets.map((block, idx) => (
           <div key={idx} dangerouslySetInnerHTML={{ __html: block }} />
         ))}
       </div>
-        
-                 <WordSearchPuzzle  />
-              
+
  <div>
    
     </div>
-   
+   <h1 className="text-2xl mb-4 text-center">Try This Puzzle</h1>
+      <WordSearchPuzzle />
     </footer>
   );
 }
