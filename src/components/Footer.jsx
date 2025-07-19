@@ -42,12 +42,12 @@ export default function Footer() {
           <div key={idx} dangerouslySetInnerHTML={{ __html: block }} />
         ))}
       </div>
-
- <div>
-   
-    </div>
-   <h1 className="text-2xl mb-4 text-center">Try This Puzzle</h1>
+  <h1 className="text-2xl mb-4 text-center">Try This Puzzle:</h1>
       <WordSearchPuzzle />
+ <div>
+    
+    </div>
+
     </footer>
   );
 }
