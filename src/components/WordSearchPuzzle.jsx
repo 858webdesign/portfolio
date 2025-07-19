@@ -185,47 +185,49 @@ export default function WordSearchPuzzle() {
 
   return (
     <div className="mx-auto p-4 text-center select-none relative">
-      <h2 className="text-xl font-bold mb-2">Word Search</h2>
+      <h2 className="text-xl font-bold mb-2">Word Search-</h2>
       <div className="flex justify-center">
-        <div
-          className="grid aspect-square gap-[1px] bg-gray-300 w-[clamp(300px,80vmin,600px)]"
-          style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 15}, 1fr)` }}
-          onTouchStart={(e) => e.preventDefault()}
-        >
-          {grid.map((row, rowIndex) =>
-            row.map((letter, colIndex) => {
-              const selected = isSelected(rowIndex, colIndex);
-              const highlighted = isHighlighted(rowIndex, colIndex);
-              return (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[20px] md:text-[26px]
-                    ${highlighted ? 'bg-green-500 text-white' : selected ? 'bg-yellow-300 text-black' : 'bg-[var(--color-bg)] text-[var(--color-text)]'}`}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    startSelection(rowIndex, colIndex);
-                  }}
-                  onMouseMove={() => {
-                    if (isSelecting) updateSelection(rowIndex, colIndex);
-                  }}
-                  onMouseUp={endSelection}
-                  onTouchStart={() => startSelection(rowIndex, colIndex)}
-                  onTouchMove={(e) => {
-                    const touch = e.touches[0];
-                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                    if (target?.dataset?.cell) {
-                      const [r, c] = target.dataset.cell.split('-').map(Number);
-                      updateSelection(r, c);
-                    }
-                  }}
-                  onTouchEnd={endSelection}
-                  data-cell={`${rowIndex}-${colIndex}`}
-                >
-                  {letter}
-                </div>
-              );
-            })
-          )}
+        <div className="w-full max-w-[600px] overflow-x-auto">
+          <div
+            className="grid aspect-square gap-[1px] bg-gray-300 w-full"
+            style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 15}, 1fr)` }}
+            onTouchStart={(e) => e.preventDefault()}
+          >
+            {grid.map((row, rowIndex) =>
+              row.map((letter, colIndex) => {
+                const selected = isSelected(rowIndex, colIndex);
+                const highlighted = isHighlighted(rowIndex, colIndex);
+                return (
+                  <div
+                    key={`${rowIndex}-${colIndex}`}
+                    className={`aspect-square w-full flex items-center justify-center border border-white cursor-pointer touch-none text-[20px] md:text-[26px]
+                      ${highlighted ? 'bg-green-500 text-white' : selected ? 'bg-yellow-300 text-black' : 'bg-[var(--color-bg)] text-[var(--color-text)]'}`}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      startSelection(rowIndex, colIndex);
+                    }}
+                    onMouseMove={() => {
+                      if (isSelecting) updateSelection(rowIndex, colIndex);
+                    }}
+                    onMouseUp={endSelection}
+                    onTouchStart={() => startSelection(rowIndex, colIndex)}
+                    onTouchMove={(e) => {
+                      const touch = e.touches[0];
+                      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                      if (target?.dataset?.cell) {
+                        const [r, c] = target.dataset.cell.split('-').map(Number);
+                        updateSelection(r, c);
+                      }
+                    }}
+                    onTouchEnd={endSelection}
+                    data-cell={`${rowIndex}-${colIndex}`}
+                  >
+                    {letter}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
 
