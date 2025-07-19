@@ -187,7 +187,6 @@ export default function WordSearchPuzzle() {
     <div className="mx-auto p-4 text-center select-none relative">
       <h2 className="text-xl font-bold mb-2">Word Search</h2>
       <div className="flex justify-center">
-        <div clasname="w-full max-w-full overflow-x-hidden">
         <div
           className="grid aspect-square gap-[1px] bg-gray-300 w-[clamp(300px,80vmin,600px)]"
           style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 15}, 1fr)` }}
@@ -227,7 +226,6 @@ export default function WordSearchPuzzle() {
               );
             })
           )}
-        </div>
         </div>
       </div>
 
