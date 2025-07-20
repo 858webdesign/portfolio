@@ -4,7 +4,7 @@ import './globals.css';
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import ThemeWrapper from '@/components/ThemeWrapper';
-import ThemeToggle from '@/components/ThemeToggle';
+
 import CustomCursor from '@/components/CustomCursor';
 import Footer from '@/components/Footer'; // ✅ Import
 
@@ -27,10 +27,8 @@ export default function RootLayout({ children }) {
         <ThemeWrapper>
           <CustomCursor />
           <Header />
-          <div className="max-w-[1440px] mx-auto px-4 pt-6 cursor-none">
-            <div className="flex justify-end mb-4">
-              <ThemeToggle />
-            </div>
+          <div className="max-w-[1440px] mx-auto px-4 pt-6 cursor-none ">
+           
             <main>{children}</main>
               <Footer />
           </div>          

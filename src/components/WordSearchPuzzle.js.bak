@@ -71,7 +71,7 @@ export default function WordSearchCanvas() {
   const cellSize = 32;
 
   const draggingRef = useRef(false);
-  const dragStartRef = useRef(null);
+  const lockedDirRef = useRef(null);
 
   useEffect(() => {
     const newWords = getRandomWords(commonWordPool, 5);
@@ -141,7 +141,7 @@ export default function WordSearchCanvas() {
     e.preventDefault();
     const start = getCellFromEvent(e);
     draggingRef.current = true;
-    dragStartRef.current = start;
+    lockedDirRef.current = null;
     setSelectedPath([start]);
   };
 
@@ -151,42 +151,42 @@ export default function WordSearchCanvas() {
 
     const current = getCellFromEvent(e);
     const path = selectedPath;
-    const start = path[0];
+    if (!path.length) return;
 
-    if (!start || (current.row === path[path.length - 1].row && current.col === path[path.length - 1].col)) return;
+    const first = path[0];
+    const len = path.length;
 
-    const alreadyUsed = path.some(p => p.row === current.row && p.col === current.col);
-    if (alreadyUsed) return;
+    // Determine intended direction from the very first cell
+    if (len === 1) {
+      const dr = current.row - first.row;
+      const dc = current.col - first.col;
+      if (Math.abs(dr) > 1 || Math.abs(dc) > 1) return;
+      if (dr === 0 && dc === 0) return;
+      lockedDirRef.current = [dr, dc];
+    }
 
-    const dx = current.col - start.col;
-    const dy = current.row - start.row;
-    const len = Math.max(Math.abs(dx), Math.abs(dy));
-    if (len === 0) return;
+    const [dr, dc] = lockedDirRef.current || [];
+    const expectedRow = first.row + dr * len;
+    const expectedCol = first.col + dc * len;
 
-    const stepX = dx / len;
-    const stepY = dy / len;
-
-    if (!Number.isInteger(stepX) || !Number.isInteger(stepY)) return;
-
-    const expected = { row: start.row + stepY * path.length, col: start.col + stepX * path.length };
-    if (current.row !== expected.row || current.col !== expected.col) return;
+    if (current.row !== expectedRow || current.col !== expectedCol) return;
+    if (path.some(p => p.row === current.row && p.col === current.col)) return;
 
     setSelectedPath([...path, current]);
   };
 
   const handleDragEnd = () => {
     draggingRef.current = false;
-    dragStartRef.current = null;
-
+    lockedDirRef.current = null;
     const path = selectedPath;
     if (!path.length) return;
 
-    const letters = path.map(({ row, col }) => grid[row]?.[col]).join('');
+    const letters = path.map(({ row, col }) => grid[row][col]).join('');
     const reversed = letters.split('').reverse().join('');
-    const matched = words.find(w => w === letters || w === reversed);
+    const match = words.find(w => w === letters || w === reversed);
 
-    if (matched && !foundWords.find(p => p.word === matched)) {
-      setFoundWords(prev => [...prev, { word: matched, path }]);
+    if (match && !foundWords.find(f => f.word === match)) {
+      setFoundWords(prev => [...prev, { word: match, path }]);
     }
 
     setSelectedPath([]);

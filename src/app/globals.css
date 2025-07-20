@@ -21,40 +21,22 @@
 }
 
 
+/* Hide default cursor globally */
+html,
 body,
-a,
-button,
-input,
-textarea {
-  cursor: none !important;
-}
-
-main * {
-  cursor: none !important;
-}
-
-
-
 * {
   cursor: none !important;
 }
-/* Hide system cursor globally */
-/* globals.css */
-html, body {
-  cursor: none;
+
+/* Hide custom cursor on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .custom-cursor {
+    display: none !important;
+  }
 }
 
-/* Show system cursor on interactive elements */
-/* Hide default cursor globally */
-*,
-a,
-button,
-input,
-textarea,
-select,
-[role="button"] {
-  cursor: none !important;
-}
+
+
 :root {
   /* Default Theme — "Retro" */
   --color-bg: #ffffff;            /* white background */
@@ -95,8 +77,3 @@ body {
 }
 
 
-@media (hover: none) and (pointer: coarse) {
-  .custom-cursor {
-    display: none !important;
-  }
-}

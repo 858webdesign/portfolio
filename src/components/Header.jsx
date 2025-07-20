@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Header() {
   const pathname = usePathname();
@@ -39,7 +40,9 @@ export default function Header() {
           <h1 className="text-xl text-[var(--color-accent)]">Welcome</h1>
 
         </Link>
-        <p className="text-base-text bg-base-bg">Welcome</p>
+        <div className="flex justify-end">
+              <ThemeToggle />
+            </div>
         <div className="space-x-4">
           {navLinks.map(({ href, label }) => {
             const isActive =
