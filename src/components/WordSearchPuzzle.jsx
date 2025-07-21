@@ -71,7 +71,6 @@ export default function WordSearchCanvas() {
   const cellSize = 32;
 
   const draggingRef = useRef(false);
-  const dragStartRef = useRef(null);
 
   useEffect(() => {
     const newWords = getRandomWords(commonWordPool, 5);
@@ -137,56 +136,56 @@ export default function WordSearchCanvas() {
     return { row, col };
   };
 
+  const isStraightLineFromStart = (start, current) => {
+    const dr = current.row - start.row;
+    const dc = current.col - start.col;
+    const length = Math.max(Math.abs(dr), Math.abs(dc));
+    if (length === 0) return false;
+    const stepR = dr / length;
+    const stepC = dc / length;
+    const path = [];
+
+    for (let i = 0; i <= length; i++) {
+      const r = start.row + stepR * i;
+      const c = start.col + stepC * i;
+      if (!Number.isInteger(r) || !Number.isInteger(c)) return null;
+      if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length) return null;
+      path.push({ row: r, col: c });
+    }
+
+    return path;
+  };
+
   const handleDragStart = (e) => {
     e.preventDefault();
     const start = getCellFromEvent(e);
     draggingRef.current = true;
-    dragStartRef.current = start;
     setSelectedPath([start]);
   };
 
   const handleDragMove = (e) => {
-    if (!draggingRef.current) return;
+    if (!draggingRef.current || !selectedPath.length) return;
     e.preventDefault();
 
+    const start = selectedPath[0];
     const current = getCellFromEvent(e);
-    const path = selectedPath;
-    const start = path[0];
-
-    if (!start || (current.row === path[path.length - 1].row && current.col === path[path.length - 1].col)) return;
-
-    const alreadyUsed = path.some(p => p.row === current.row && p.col === current.col);
-    if (alreadyUsed) return;
-
-    const dx = current.col - start.col;
-    const dy = current.row - start.row;
-    const len = Math.max(Math.abs(dx), Math.abs(dy));
-    if (len === 0) return;
-
-    const stepX = dx / len;
-    const stepY = dy / len;
-
-    if (!Number.isInteger(stepX) || !Number.isInteger(stepY)) return;
-
-    const expected = { row: start.row + stepY * path.length, col: start.col + stepX * path.length };
-    if (current.row !== expected.row || current.col !== expected.col) return;
-
-    setSelectedPath([...path, current]);
+    const path = isStraightLineFromStart(start, current);
+    if (path) {
+      setSelectedPath(path);
+    }
   };
 
   const handleDragEnd = () => {
     draggingRef.current = false;
-    dragStartRef.current = null;
-
     const path = selectedPath;
     if (!path.length) return;
 
-    const letters = path.map(({ row, col }) => grid[row]?.[col]).join('');
+    const letters = path.map(({ row, col }) => grid[row][col]).join('');
     const reversed = letters.split('').reverse().join('');
-    const matched = words.find(w => w === letters || w === reversed);
+    const match = words.find(w => w === letters || w === reversed);
 
-    if (matched && !foundWords.find(p => p.word === matched)) {
-      setFoundWords(prev => [...prev, { word: matched, path }]);
+    if (match && !foundWords.find(f => f.word === match)) {
+      setFoundWords(prev => [...prev, { word: match, path }]);
     }
 
     setSelectedPath([]);
@@ -204,7 +203,6 @@ export default function WordSearchCanvas() {
             if (grid[r][c] !== word[i]) break;
             path.push({ row: r, col: c });
           }
-
           if (path.length === word.length) {
             setSelectedPath(path);
             setTimeout(() => setSelectedPath([]), 1000);
