@@ -81,8 +81,22 @@ body {
 
 
 @layer utilities {
-  .firework-loop {
-    animation: firework 1s ease-out forwards;
-    animation-iteration-count: infinite;
+  @keyframes firework {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-10px) scale(1.3);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-firework {
+    animation: firework 1s ease-in-out infinite;
   }
 }

@@ -2,10 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+/*
 const commonWordPool = [
   'APPLE', 'BANANA', 'ORANGE', 'CHAIR', 'TABLE', 'WINDOW', 'MOUNTAIN', 'RIVER',
   'OCEAN', 'TREE', 'HOUSE', 'CANDLE', 'PENCIL', 'PAPER', 'LADDER', 'BUTTON',
   'CLOCK', 'MIRROR', 'WATER', 'SNOW', 'RAIN', 'STORM', 'CLOUD', 'BRIDGE', 'CARPET'
+];
+*/
+
+const commonWordPool = [
+  'APPLE'
 ];
 
 const directions = [

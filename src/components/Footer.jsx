@@ -43,7 +43,7 @@ export default function Footer() {
         ))}
       </div>
   <h1 className="text-2xl mb-4 text-center">Try This Puzzle:</h1>
-      <WordSearchPuzzle />
+     
  <div>
     
     </div>
