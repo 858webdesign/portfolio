@@ -68,22 +68,38 @@ export default function WordSearchCanvas() {
   const [grid, setGrid] = useState([]);
   const [selectedPath, setSelectedPath] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
+  const [user, setUser] = useState({ name: '', email: '' });
+  const [submitted, setSubmitted] = useState(false);
+  const [gameComplete, setGameComplete] = useState(false);
   const cellSize = 32;
-
   const draggingRef = useRef(false);
 
   useEffect(() => {
+    const storedName = localStorage.getItem('ws_name');
+    const storedEmail = localStorage.getItem('ws_email');
+    if (storedName && storedEmail) {
+      setUser({ name: storedName, email: storedEmail });
+      setSubmitted(true);
+      initGame();
+    }
+  }, []);
+
+  useEffect(() => {
+    drawGrid(grid, selectedPath, foundWords.flatMap(w => w.path));
+    if (words.length > 0 && foundWords.length === words.length) {
+      setGameComplete(true);
+    }
+  }, [grid, selectedPath, foundWords]);
+
+  const initGame = () => {
     const newWords = getRandomWords(commonWordPool, 5);
     const newGrid = generateGridWithWords(newWords);
     setWords(newWords);
     setGrid(newGrid);
     setFoundWords([]);
-    drawGrid(newGrid, [], []);
-  }, []);
-
-  useEffect(() => {
-    drawGrid(grid, selectedPath, foundWords.flatMap(w => w.path));
-  }, [grid, selectedPath, foundWords]);
+    setSelectedPath([]);
+    setGameComplete(false);
+  };
 
   const drawGrid = (grid, selection = [], found = []) => {
     const canvas = canvasRef.current;
@@ -166,7 +182,6 @@ export default function WordSearchCanvas() {
   const handleDragMove = (e) => {
     if (!draggingRef.current || !selectedPath.length) return;
     e.preventDefault();
-
     const start = selectedPath[0];
     const current = getCellFromEvent(e);
     const path = isStraightLineFromStart(start, current);
@@ -179,15 +194,12 @@ export default function WordSearchCanvas() {
     draggingRef.current = false;
     const path = selectedPath;
     if (!path.length) return;
-
     const letters = path.map(({ row, col }) => grid[row][col]).join('');
     const reversed = letters.split('').reverse().join('');
     const match = words.find(w => w === letters || w === reversed);
-
     if (match && !foundWords.find(f => f.word === match)) {
       setFoundWords(prev => [...prev, { word: match, path }]);
     }
-
     setSelectedPath([]);
   };
 
@@ -213,35 +225,119 @@ export default function WordSearchCanvas() {
     }
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center p-4">
-      <canvas
-        ref={canvasRef}
-        className="touch-none border border-gray-300"
-        onMouseDown={handleDragStart}
-        onMouseMove={(e) => e.buttons === 1 && handleDragMove(e)}
-        onMouseUp={handleDragEnd}
-        onMouseLeave={(e) => e.buttons === 1 && handleDragEnd(e)}
-        onTouchStart={handleDragStart}
-        onTouchMove={handleDragMove}
-        onTouchEnd={handleDragEnd}
-      />
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!user.name || !user.email) return;
+    localStorage.setItem('ws_name', user.name);
+    localStorage.setItem('ws_email', user.email);
+    setSubmitted(true);
+    initGame();
+  };
 
-      <div className="flex flex-wrap justify-center gap-2 mt-4">
-        {words.map((word) => {
-          const isFound = foundWords.some(w => w.word === word);
-          return (
-            <button
-              key={word}
-              onClick={() => highlightWord(word)}
-              className={`px-2 py-1 rounded text-sm border transition-colors
-                ${isFound ? 'bg-green-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-300'}
-              `}
-            >
-              {word}
-            </button>
-          );
-        })}
+  const resetGame = () => {
+    initGame();
+  };
+
+  if (!submitted) {
+    return (
+      <div className="max-w-sm mx-auto mt-10 p-4 border rounded bg-white shadow">
+        <h2 className="text-lg font-bold mb-2">Enter to Play</h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <input
+            type="text"
+            placeholder="Your name"
+            value={user.name}
+            onChange={(e) => setUser({ ...user, name: e.target.value })}
+            className="border p-2 rounded"
+            required
+          />
+          <input
+            type="email"
+            placeholder="Your email"
+            value={user.email}
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
+            className="border p-2 rounded"
+            required
+          />
+          <button type="submit" className="bg-blue-500 text-white py-2 rounded">
+            Start Game
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex flex-col items-center justify-center p-4 w-full">
+      {/* Floating success message */}
+    {gameComplete && (
+  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-10 text-center px-4">
+    {/* 🎆 Fireworks floating around (behind message) */}
+    <span className="absolute top-10 left-10 text-4xl animate-firework text-yellow-400">🎆</span>
+    <span className="absolute top-10 right-10 text-4xl animate-firework text-red-400 delay-150">🎇</span>
+    <span className="absolute bottom-10 left-20 text-4xl animate-firework text-purple-400 delay-300">🎆</span>
+    <span className="absolute bottom-10 right-20 text-4xl animate-firework text-green-400 delay-500">🎇</span>
+
+    {/* Message box */}
+    <div className="bg-green-500 text-white px-6 py-4 rounded shadow-xl animate-dance">
+      <h2 className="text-xl font-bold text-white leading-relaxed mb-4 animate-pulse">
+        🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉 🎉
+        <br />
+        Go, go<br />
+        Go, go, go, go<br />
+        Go, {user.name}, it's your birthday<br />
+        We gon' party like it's your birthday<br />
+        We gon' sip Bacardí like it's your birthday<br />
+        And you know we don't care if it's not your birthday!!
+        <br />
+        🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉
+      </h2>
+
+      <button
+        onClick={resetGame}
+        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Play Again
+      </button>
+    </div>
+  </div>
+)}
+
+
+
+      {/* Puzzle and word list */}
+      <div
+        className={`transition-opacity duration-700 ease-in-out ${
+          gameComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+      >
+        <canvas
+          ref={canvasRef}
+          className="touch-none border border-gray-300"
+          onMouseDown={handleDragStart}
+          onMouseMove={(e) => e.buttons === 1 && handleDragMove(e)}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={(e) => e.buttons === 1 && handleDragEnd(e)}
+          onTouchStart={handleDragStart}
+          onTouchMove={handleDragMove}
+          onTouchEnd={handleDragEnd}
+        />
+
+        <div className="flex flex-wrap justify-center gap-2 mt-4">
+          {words.map((word) => {
+            const isFound = foundWords.some(w => w.word === word);
+            return (
+              <button
+                key={word}
+                onClick={() => highlightWord(word)}
+                className={`px-2 py-1 rounded text-sm border
+                ${isFound ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'}`}
+              >
+                {word}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

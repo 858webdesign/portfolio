@@ -8,12 +8,14 @@ export async function generateMetadata() {
 async function getProjects() {
   const res = await fetch(
     'https://backend.petereichhorst.com/wp-json/wp/v2/project?_embed&per_page=20',
-    { next: { revalidate: 60 } }
+    { cache: 'no-store' } // disables Next.js caching
   );
 
   if (!res.ok) throw new Error('Failed to fetch projects');
   return res.json();
 }
+
+
 
 function getScreenshotUrl(siteUrl) {
   const base = 'https://shot.screenshotapi.net/screenshot';

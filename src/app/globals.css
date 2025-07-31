@@ -1,4 +1,7 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 
 /* globals.css */
@@ -77,3 +80,9 @@ body {
 }
 
 
+@layer utilities {
+  .firework-loop {
+    animation: firework 1s ease-out forwards;
+    animation-iteration-count: infinite;
+  }
+}
