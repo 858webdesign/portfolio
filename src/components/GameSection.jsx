@@ -1,29 +1,30 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 
 export default function GameSection({ showGame }) {
-  const pathname = usePathname();
-
   useEffect(() => {
     if (!showGame) return;
 
-    const el = document.getElementById('vite-game-root');
-    if (el) el.dataset.mounted = ''; // 🧼 Clear stale mount marker
-
     const mountGame = () => {
-      if (window.__vite_game_mount__) {
-        alert('🚀 Mounting game via window.__vite_game_mount__()');
-        window.__vite_game_mount__();
-      } else {
-        alert('⚠️ mount fn not ready');
-      }
+      const el = document.getElementById('vite-game-root');
+      if (!el || el.dataset.mounted) return;
+
+      const tryMount = () => {
+        if (window.__vite_game_mount__) {
+          window.__vite_game_mount__();
+          el.dataset.mounted = 'true';
+        } else {
+          console.warn('⚠️ mount fn not ready, retrying...');
+          setTimeout(tryMount, 50);
+        }
+      };
+
+      tryMount();
     };
 
     const existingScript = document.getElementById('vite-game-script');
     if (!existingScript) {
-      alert('📜 Adding Vite game script...');
       const script = document.createElement('script');
       script.src =
         'https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist/assets/index.js';
@@ -34,7 +35,7 @@ export default function GameSection({ showGame }) {
     } else {
       mountGame();
     }
-  }, [pathname, showGame]);
+  }, [showGame]);
 
   if (!showGame) return null;
 
