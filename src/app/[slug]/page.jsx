@@ -2,9 +2,6 @@
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { getMetadata } from '@/lib/getMetadata';
-// import ViteGameLoader from '@/components/ViteGameLoader';
-// import { useEffect } from 'react';
-
 import GameSection from '@/components/GameSection';
 
 export async function generateMetadata({ params }) {
@@ -51,7 +48,7 @@ export default async function Page({ params }) {
 
 
   {/* ✅ Puzzle section now client-rendered safely */}
-    {page?.acf?.show_vite_game && <GameSection showGame={true} />}
+    {page?.acf?.show_vite_game && <GameSection />}
 </>
 
 
