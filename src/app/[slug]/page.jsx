@@ -2,6 +2,10 @@
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { getMetadata } from '@/lib/getMetadata';
+// import ViteGameLoader from '@/components/ViteGameLoader';
+// import { useEffect } from 'react';
+
+import GameSection from '@/components/GameSection';
 
 export async function generateMetadata({ params }) {
   const slug = params?.slug || 'home';
@@ -29,14 +33,28 @@ export default async function Page({ params }) {
     ? page.acf.builder.value_formatted
     : [];
 
+
+    
   return (
-    <><div className="min-h-screen cursor-none relative">
-      <h1 className="text-3xl font-bold mb-6">{page.title.rendered}</h1>
-<Link href="/contact" className="text-blue-600 underline">Contact</Link>
-      <div className="prose max-w-none text-black dark:text-white">
-        <div dangerouslySetInnerHTML={{ __html: page.content.rendered }} />
+    <>
+      <div className="min-h-screen cursor-none relative">
+        <h1 className="text-3xl font-bold mb-6">{page.title.rendered}</h1>
+        <Link href="/contact" className="text-blue-600 underline">Contact</Link>
+        <div className="prose max-w-none text-black dark:text-white">
+          <div dangerouslySetInnerHTML={{ __html: page.content.rendered }} />
+        </div>
       </div>
-      </div>
+      <>
+      {/* ✅ ACF conditional for puzzle */}
+   
+   
+
+
+  {/* ✅ Puzzle section now client-rendered safely */}
+    {page?.acf?.show_vite_game && <GameSection showGame={true} />}
+</>
+
+
     </>
   );
 }

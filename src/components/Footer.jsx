@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
-import WordSearchPuzzle from '@/components/WordSearchPuzzle';
 
-export default function Footer() {
+import { useEffect, useState } from 'react';
+
+export default function Footer({ page }) {
   const [widgets, setWidgets] = useState([]);
 
   useEffect(() => {
@@ -12,7 +12,6 @@ export default function Footer() {
         const data = await res.json();
 
         if (data?.html) {
-          // Split the HTML string into widget chunks based on divs
           const blocks = data.html.match(/<div class="footer-widget">[\s\S]*?<\/div>/g) || [];
           setWidgets(blocks);
         }
@@ -24,6 +23,8 @@ export default function Footer() {
     fetchFooter();
   }, []);
 
+
+
   const colMap = {
     1: 'sm:grid-cols-1',
     2: 'sm:grid-cols-2',
@@ -33,6 +34,8 @@ export default function Footer() {
     6: 'sm:grid-cols-6',
   };
 
+
+  
   const gridClass = `grid grid-cols-1 ${colMap[widgets.length] || 'sm:grid-cols-1'} gap-6`;
 
   return (
@@ -41,13 +44,7 @@ export default function Footer() {
         {widgets.map((block, idx) => (
           <div key={idx} dangerouslySetInnerHTML={{ __html: block }} />
         ))}
-      </div>
-  <h1 className="text-2xl mb-4 text-center">Try This Puzzle:</h1>
-     
- <div>
-    
-    </div>
-
+      </div>    
     </footer>
   );
 }
