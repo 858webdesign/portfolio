@@ -24,7 +24,7 @@ export default function ViteGameLoader() {
     if (!existingScript) {
       const script = document.createElement('script');
       script.src =
-        'https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist/assets/index.js';
+        'https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist/assets/embed-games.js';
       script.id = 'vite-game-script';
       script.defer = true;
       script.onload = mountWhenReady;

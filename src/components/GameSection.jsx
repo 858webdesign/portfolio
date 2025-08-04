@@ -18,7 +18,7 @@ export default function GameSection() {
     if (!document.getElementById('vite-game-script')) {
       const script = document.createElement('script');
       script.id = 'vite-game-script';
-      script.src = 'https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist/assets/index.js';
+      script.src = 'https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist/assets/embed-games.js';
       script.defer = true;
       script.onload = mountGame;
       document.body.appendChild(script);
@@ -29,7 +29,7 @@ export default function GameSection() {
 
   return (
     <>
-      <h1 className="text-2xl mb-4 text-center">Try This Puzzle:</h1>
+      <h1 className="text-2xl mb-4 text-center">Try This Puzzles:</h1>
       <div id="vite-game-root" className="my-8" />
     </>
   );
