@@ -1,27 +1,12 @@
 export const dynamic = 'force-dynamic';
 
-// Fix: Replaced the original Link import with a mock component to resolve the "next/link" error.
-const Link = ({ href, children, ...props }) => <a href={href} {...props}>{children}</a>;
+import Link from 'next/link';
+import GameSection from '@/components/GameSection'; // ← client component (no dynamic)
 
-// Fix: Added a mock GameSection component to resolve the "@/components/GameSection" error.
-// In your actual project, this component would be in its own file at `src/components/GameSection.jsx`.
-const GameSection = () => (
-  <div style={{ padding: '20px', border: '1px solid gray', marginTop: '20px' }}>
-    <p>Placeholder for GameSection component.</p>
-  </div>
-);
-
-// Mock function to make the component runnable without the external file
 async function getMetadata(slug) {
-  return {
-    title: `Project: ${slug}`,
-    description: `Details for project ${slug}.`
-  };
+  return { title: `Project: ${slug}`, description: `Details for project ${slug}.` };
 }
 
-// The getPageBySlug function was not included in your code, so I have added a placeholder
-// for it to make the file complete and runnable. Please replace this with your actual implementation
-// if it exists elsewhere.
 async function getPageBySlug(slug) {
   const res = await fetch(
     `https://backend.petereichhorst.com/wp-json/wp/v2/pages?slug=${slug}&acf_format=standard`,
@@ -31,31 +16,21 @@ async function getPageBySlug(slug) {
   return Array.isArray(data) && data.length > 0 ? data[0] : null;
 }
 
-async function getProjects() {
-  const res = await fetch(
-    'https://backend.petereichhorst.com/wp-json/wp/v2/project?_embed&per_page=20',
-    { cache: 'no-store' } // disables Next.js caching
-  );
-
-  if (!res.ok) throw new Error('Failed to fetch projects');
-  return res.json();
+export async function generateMetadata(props) {
+  const { slug } = await props.params;            // await params (Next 15)
+  return getMetadata(slug ?? 'home');
 }
 
-export async function generateMetadata({ params }) {
-  // Fix: Add explicit check for params and slug before using
-  const slug = (params && params.slug) ? params.slug : 'home';
-  return await getMetadata(slug);
-}
+export default async function Page(props) {
+  const { slug } = await props.params;            // await params (Next 15)
+  const safeSlug = slug ?? 'home';
 
-export default async function Page({ params }) {
-  // Fix: Add explicit check for params and slug before using
-  const slug = (params && params.slug) ? params.slug : 'home';
-  const page = await getPageBySlug(slug);
+  const page = await getPageBySlug(safeSlug);
+  if (!page) return <div className="p-8 text-center">Page not found</div>;
 
-  if (!page) {
-    return <div className="p-8 text-center">Page not found</div>;
-  }
- 
+  // Coerce ACF boolean ("1"/"0")
+  const showGame = !!Number(page?.acf?.show_vite_game);
+
   return (
     <>
       <div className="min-h-screen relative">
@@ -65,11 +40,8 @@ export default async function Page({ params }) {
           <div dangerouslySetInnerHTML={{ __html: page.content.rendered }} />
         </div>
       </div>
-      <>
-        {/* ✅ ACF conditional for puzzle */}
-        {/* ✅ Puzzle section now client-rendered safely */}
-        {page?.acf?.show_vite_game && <GameSection />}
-      </>
+
+      {showGame && <GameSection />}   {/* Client boundary */}
     </>
   );
 }
