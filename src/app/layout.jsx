@@ -1,49 +1,37 @@
-'use client';
-
+// NO 'use client' here
 import './globals.css';
-import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import ThemeWrapper from '@/components/ThemeWrapper';
-import CustomCursor from '@/components/CustomCursor';
 import Footer from '@/components/Footer';
-import MusicPlayer from '@/components/MusicPlayer';
+import ClientProviders from '@/components/ClientProviders';
 
-export default function RootLayout({ children }) {
-  const [theme, setTheme] = useState('default');
-  const [page, setPage] = useState(null);
+export const metadata = {
+  title: 'Site',
+  description: '...',
+};
 
-  useEffect(() => {
-    document.documentElement.setAttribute(
-      'data-theme',
-      theme === 'retro' ? 'retro' : 'default'
-    );
-  }, [theme]);
-
-  useEffect(() => {
-    async function fetchPage() {
-      const res = await fetch('https://backend.petereichhorst.com/wp-json/wp/v2/pages?slug=about'); // update this slug dynamically if needed
-      const data = await res.json();
-      setPage(data?.[0] || null);
-    }
-
-    fetchPage();
-  }, []);
-
-
-
+export default async function RootLayout({ children }) {
+  // Server-side fetch so SSR & client match
+  const res = await fetch(
+    'https://backend.petereichhorst.com/wp-json/wp/v2/pages?slug=about',
+    { next: { revalidate: 60 } } // cache for a minute; tweak as needed
+  );
+  const data = await res.json();
+  const page = data?.[0] || null;
 
   return (
-    <html lang="en" className="cursor-none">
-      <body className={`transition-colors duration-300 cursor-none bg-[var(--color-bg)] text-[var(--color-text)] ${theme}`}>
-        <ThemeWrapper>
-          <MusicPlayer />
-          <CustomCursor />
-          <Header />
-          <div className="max-w-[1440px] mx-auto px-4 pt-6 cursor-none ">
-            <main>{children}</main>
-            {page && <Footer page={page} />} {/* ✅ Now ACF works */}
-          </div>
-        </ThemeWrapper>
+    <html lang="en" suppressHydrationWarning>
+      <body className="transition-colors duration-300 bg-[var(--color-bg)] text-[var(--color-text)]">
+        {/* If ThemeWrapper is a server component, keep it here. If it's client, move it into ClientProviders */}
+        <ClientProviders>
+          <ThemeWrapper>
+            <Header />
+            <div className="max-w-[1440px] mx-auto px-4 pt-6">
+              <main>{children}</main>
+              {page && <Footer page={page} />}
+            </div>
+          </ThemeWrapper>
+        </ClientProviders>
       </body>
     </html>
   );
