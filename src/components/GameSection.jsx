@@ -91,7 +91,7 @@ export default function GameSection() {
 
   return (
     <>
-      <h2 className="text-2xl mb-4 text-center">Try These Puzzles:</h2>
+      <h2 className="text-2xl mb-4 text-center">Try These Puzzle:</h2>
       <div
         id="vite-game-root"
         ref={rootRef}
