@@ -24,8 +24,7 @@ export default async function RootLayout({ children }) {
       <body className="transition-colors duration-300 bg-[var(--color-bg)] text-[var(--color-text)]">
         {/* If ThemeWrapper is a server component, keep it here. If it's client, move it into ClientProviders */}
         <ClientProviders>
-          <ThemeWrapper>
-            <Header />
+          <ThemeWrapper>          
             <div className="max-w-[1440px] mx-auto px-4 pt-6">
               <main>{children}</main>
               {page && <Footer page={page} />}

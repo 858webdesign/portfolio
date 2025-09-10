@@ -56,7 +56,10 @@ export default async function HomePage() {
         }
       `}</style>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center text-black">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center text-black"
+      
+      
+      >
         {projects.map((project) => {
           const featuredImage = project._embedded?.['wp:featuredmedia']?.[0]?.source_url;
           const projectUrl = project.acf?.url || project.meta?.url;
@@ -70,7 +73,10 @@ export default async function HomePage() {
               prefetch={false}
               className="block border rounded-lg overflow-hidden hover:shadow-lg transition duration-300 bg-white"
             >
-              <div className="scroll-container">
+              <div className="scroll-container"
+             
+              
+              >
                 <img
                   src={previewImage}
                   alt={project.title.rendered}
@@ -78,9 +84,12 @@ export default async function HomePage() {
                 />
               </div>
 
-              <div className="p-4">
+              <div className="p-4"
+               style={{ background: 'var(--color-accent)'}}
+              >
                 <h2
                   className="text-xl font-semibold"
+                  style={{ color: 'var(--color-text)' }}
                   dangerouslySetInnerHTML={{ __html: project.title.rendered }}
                 />
                 {project.excerpt?.rendered?.trim() && (

@@ -7,6 +7,7 @@ const PLAYLIST = [
   'https://backend.petereichhorst.com/audio/Esoteric.mp3',
   'https://backend.petereichhorst.com/audio/Relax.mp3',
   'https://backend.petereichhorst.com/audio/Grooving.mp3',
+  'https://backend.petereichhorst.com/audio/Nostalgic.mp3',
 ];
 
 const titleFromUrl = (url) => {
@@ -248,7 +249,7 @@ export default function MusicPlayer() {
         }}
       >
         {/* Active title */}
-        <span className="font-medium text-sm text-center opacity-80 px-3">
+        <span className="font-bold text-lg text-center opacity-80 px-3">
           {activeTitle || 'Loading...'}
         </span>
 
