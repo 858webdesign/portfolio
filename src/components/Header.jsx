@@ -28,8 +28,8 @@ export default function Header({ theme }) {
 
   const logoSrc =
     theme === 'alt'
-      ? 'https://858webdesign.com/wp-content/uploads/2022/03/858-DESIGN-VINTAGE-2022.png'
-      : 'https://858webdesign.com/wp-content/uploads/2022/03/858-DESIGN-2022-300x188.png';
+      ? 'https://backend.petereichhorst.com/wp-content/uploads/2025/09/858-logo-vintage.png'
+      : 'https://backend.petereichhorst.com/wp-content/uploads/2025/09/858-logo-modern.png';
 
   return (
     <header className="bg-gray-100s shadow-md p-4">

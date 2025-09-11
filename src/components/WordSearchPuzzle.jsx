@@ -108,44 +108,84 @@ export default function WordSearchCanvas() {
   };
 
   const drawGrid = (grid, selection = [], found = []) => {
-    const canvas = canvasRef.current;
-    if (!canvas || grid.length === 0) return;
-    const ctx = canvas.getContext('2d');
+  const canvas = canvasRef.current;
+  if (!canvas || grid.length === 0) return;
+  const ctx = canvas.getContext('2d');
 
-    const theme = getComputedStyle(document.documentElement);
-    const textColor = theme.getPropertyValue('--color-text').trim() || '#000';
-    const accentColor = theme.getPropertyValue('--color-accent').trim() || '#e35205';
-    const foundColor = '#90ee90';
-    const bgColor = '#fff';
+  // ⬅️ Get styles from nearest [data-theme] host, else :root
+  const themeHost =
+    canvas.closest?.('[data-theme]') || document.documentElement;
+  const css = getComputedStyle(themeHost);
 
-    const size = grid.length;
-    const canvasSize = size * cellSize;
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-    ctx.clearRect(0, 0, canvasSize, canvasSize);
+  const textColor   = css.getPropertyValue('--color-text').trim()   || '#000';
+  const accentColor = css.getPropertyValue('--color-accent').trim() || '#e35205';
+  const bgColor     = css.getPropertyValue('--color-bg').trim()     || '#fff';
+  const borderColor = css.getPropertyValue('--color-border').trim() || '#ccc';
+  const foundColor  = css.getPropertyValue('--color-found').trim()  || '#90ee90';
 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = `${cellSize * 0.6}px sans-serif`;
+  const size = grid.length;
+  const canvasSize = size * cellSize;
+  canvas.width = canvasSize;
+  canvas.height = canvasSize;
+  ctx.clearRect(0, 0, canvasSize, canvasSize);
 
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        const x = c * cellSize;
-        const y = r * cellSize;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `${cellSize * 0.6}px sans-serif`;
 
-        const isFound = found.some(p => p.row === r && p.col === c);
-        const isSelected = selection.some(p => p.row === r && p.col === c);
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const x = c * cellSize;
+      const y = r * cellSize;
 
-        ctx.fillStyle = isFound ? foundColor : isSelected ? accentColor : bgColor;
-        ctx.fillRect(x, y, cellSize, cellSize);
-        ctx.strokeStyle = '#ccc';
-        ctx.strokeRect(x, y, cellSize, cellSize);
+      const isFound = found.some(p => p.row === r && p.col === c);
+      const isSelected = selection.some(p => p.row === r && p.col === c);
 
-        ctx.fillStyle = textColor;
-        ctx.fillText(grid[r][c], x + cellSize / 2, y + cellSize / 2);
-      }
+      ctx.fillStyle = isFound ? foundColor : isSelected ? accentColor : bgColor;
+      ctx.fillRect(x, y, cellSize, cellSize);
+
+      ctx.strokeStyle = borderColor;
+      ctx.strokeRect(x, y, cellSize, cellSize);
+
+      ctx.fillStyle = textColor;
+      ctx.fillText(grid[r][c], x + cellSize / 2, y + cellSize / 2);
     }
+  }
+};
+
+
+
+const [themeTick, setThemeTick] = useState(0);
+
+useEffect(() => {
+  // Watch whichever element carries your theme attribute
+  const host =
+    canvasRef.current?.closest?.('[data-theme]') ||
+    document.documentElement;
+
+  const bump = () => setThemeTick(v => v + 1);
+
+  // Repaint on data-theme/class changes
+  const mo = new MutationObserver(() => bump());
+  mo.observe(host, { attributes: true, attributeFilter: ['data-theme','class'] });
+
+  // Repaint if system dark/light flips (only matters if you map to system)
+  const mql = window.matchMedia?.('(prefers-color-scheme: dark)');
+  mql?.addEventListener?.('change', bump);
+
+  return () => {
+    mo.disconnect();
+    mql?.removeEventListener?.('change', bump);
   };
+}, []);
+
+useEffect(() => {
+  drawGrid(grid, selectedPath, foundWords.flatMap(w => w.path));
+  if (words.length > 0 && foundWords.length === words.length) {
+    setGameComplete(true);
+  }
+}, [grid, selectedPath, foundWords, themeTick]); // 👈 added
+
 
   const getCellFromEvent = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();

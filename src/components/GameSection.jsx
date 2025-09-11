@@ -91,11 +91,11 @@ export default function GameSection() {
 
   return (
     <>
-      <h2 className="text-2xl mb-4 text-center">Try These Puzzle:</h2>
+      <h2 className="text-2xl mb-4 text-center"></h2>
       <div
         id="vite-game-root"
         ref={rootRef}
-        className="my-8 min-h-[200px] border border-dashed rounded-lg p-4"
+        className="my-8 min-h-[200px] text-center border border-dashed rounded-lg p-4"
       />
       {status !== "mounted" && (
         <p className="text-sm text-center text-gray-500">

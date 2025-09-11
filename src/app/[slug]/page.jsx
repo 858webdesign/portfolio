@@ -33,7 +33,7 @@ export default async function Page(props) {
 
   return (
     <>
-      <div className="min-h-screen relative">
+      <div className="min-h-screen- relative">
         <h1 className="text-3xl font-bold mb-6">{page.title.rendered}</h1>
         <Link href="/contact" className="text-blue-600 underline">Contact</Link>
         <div className="prose max-w-none text-black dark:text-white">
