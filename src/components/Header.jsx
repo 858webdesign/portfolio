@@ -37,7 +37,7 @@ export default function Header({ theme }) {
     <header className="bg-white shadow-md p-4 sticky top-0 z-50">
       <nav className="max-w-[1440px] mx-auto flex justify-between items-center">
         {/* Logo */}
-        <Link href="http://localhost:3000/" className="flex items-center">
+        <Link href="https://www.petereichhorst.com" className="flex items-center">
           <img width="150" src={logoSrc} alt="Site Logo" />
         </Link>
 
