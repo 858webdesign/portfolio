@@ -23,8 +23,6 @@ export default function Footer({ page }) {
     fetchFooter();
   }, []);
 
-
-
   const colMap = {
     1: 'sm:grid-cols-1',
     2: 'sm:grid-cols-2',
@@ -33,8 +31,6 @@ export default function Footer({ page }) {
     5: 'sm:grid-cols-5',
     6: 'sm:grid-cols-6',
   };
-
-
   
   const gridClass = `grid grid-cols-1 ${colMap[widgets.length] || 'sm:grid-cols-1'} gap-6`;
 

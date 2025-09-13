@@ -7,7 +7,7 @@ export async function generateMetadata() {
 
 async function getProjects() {
   const res = await fetch(
-    'https://backend.petereichhorst.com/wp-json/wp/v2/project?_embed&per_page=20',
+    'https://backend.petereichhorst.com/wp-json/wp/v2/project?_embed&per_page=50',
     { cache: 'no-store' } // disables Next.js caching
   );
 
@@ -29,12 +29,13 @@ function getRandomFallbackImage() {
   return `https://picsum.photos/seed/${randomId}/600/700`;
 }
 
+
 export default async function HomePage() {
   const projects = await getProjects();
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-4 text-700">My Projects:</h1>
+      <h1 className="text-3xl font-bold mb-10 mt-10 text-700">Recent Projects:</h1>
 
       <style>{`
         .scroll-container {

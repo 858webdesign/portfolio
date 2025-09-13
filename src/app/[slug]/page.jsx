@@ -1,11 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import GameSection from '@/components/GameSection'; // ← client component (no dynamic)
-
-async function getMetadata(slug) {
-  return { title: `Project: ${slug}`, description: `Details for project ${slug}.` };
-}
+import GameSection from '@/components/GameSection';
 
 async function getPageBySlug(slug) {
   const res = await fetch(
@@ -16,32 +12,40 @@ async function getPageBySlug(slug) {
   return Array.isArray(data) && data.length > 0 ? data[0] : null;
 }
 
-export async function generateMetadata(props) {
-  const { slug } = await props.params;            // await params (Next 15)
-  return getMetadata(slug ?? 'home');
+export async function generateMetadata({ params }) {
+  const slug = params?.slug ?? 'home';
+  const page = await getPageBySlug(slug);
+
+  const title =
+    (page?.yoast_head_json?.title || page?.title?.rendered || slug) +
+    ' | Peter Eichhorst';
+
+  return {
+    title,
+    description:
+      page?.yoast_head_json?.description || page?.excerpt?.rendered || '',
+  };
 }
 
-export default async function Page(props) {
-  const { slug } = await props.params;            // await params (Next 15)
-  const safeSlug = slug ?? 'home';
-
-  const page = await getPageBySlug(safeSlug);
+export default async function Page({ params }) {
+  const slug = params?.slug ?? 'home';
+  const page = await getPageBySlug(slug);
   if (!page) return <div className="p-8 text-center">Page not found</div>;
 
-  // Coerce ACF boolean ("1"/"0")
   const showGame = !!Number(page?.acf?.show_vite_game);
 
   return (
     <>
+    
       <div className="min-h-screen- relative">
         <h1 className="text-3xl font-bold mb-6">{page.title.rendered}</h1>
-        <Link href="/contact" className="text-blue-600 underline">Contact</Link>
+        <Link href="/contact" className="text-blue-600 underline"></Link>
         <div className="prose max-w-none text-black dark:text-white">
           <div dangerouslySetInnerHTML={{ __html: page.content.rendered }} />
         </div>
       </div>
 
-      {showGame && <GameSection />}   {/* Client boundary */}
+      {showGame && <GameSection />}
     </>
   );
 }
