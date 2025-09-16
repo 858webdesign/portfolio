@@ -3,25 +3,54 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Use env var so dev/prod can point to different URLs without code edits.
- * e.g. NEXT_PUBLIC_GAMES_SRC="https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist/assets/embed-games.js"
+ * e.g. NEXT_PUBLIC_GAMES_SRC="https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist-embed/embed-games.js"
  */
-const SRC =
+const DEFAULT_SRC =
   process.env.NEXT_PUBLIC_GAMES_SRC ??
-  "https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist/assets/embed-games.js";
+  "https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist-embed/embed-games.js";
 
 const ID = "vite-game-script";
+const ROOT_ID = "vite-game-root";
 
-export default function GameSection() {
+export default function GameSection({
+  label = 'Wordsearch Game',
+  debugInfo = '',
+  scriptSrc = DEFAULT_SRC,
+}) {
   const rootRef = useRef(null);
-  const didInit = useRef(false);       // guard StrictMode double-run
+  const didInit = useRef(false); // guard StrictMode double-run
   const [status, setStatus] = useState("idle"); // idle|loading|ready|mounted|error
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    if (didInit.current) return;       // prevent double-effect in dev
+    if (didInit.current) return; // prevent double-effect in dev
     didInit.current = true;
 
     const el = rootRef.current;
+
+    if (!el) return;
+
+    // Ensure the embed sees a stable id and clear out duplicates from WP content.
+    const existingRoots = Array.from(
+      document.querySelectorAll(`[id^="${ROOT_ID}"]`)
+    );
+    existingRoots.forEach((node) => {
+      if (node === el) return;
+      if (node.id === ROOT_ID || node.id.startsWith(`${ROOT_ID}-`)) {
+        node.removeAttribute("id");
+        node.textContent = '';
+      }
+    });
+
+    const fallbackRoots = Array.from(
+      document.querySelectorAll('.vite-game-root, [data-vite-game]')
+    );
+    fallbackRoots.forEach((node) => {
+      if (node === el) return;
+      node.removeAttribute('id');
+      node.textContent = '';
+    });
+    el.id = ROOT_ID;
 
     const tryMountNow = () => {
       const m = window.ViteGame?.mount || window.__vite_game_mount__;
@@ -39,7 +68,7 @@ export default function GameSection() {
       return false;
     };
 
-    const waitForGlobal = (msTotal = 3000, step = 100) =>
+    const waitForGlobal = (msTotal = 6000, step = 150) =>
       new Promise((resolve) => {
         let waited = 0;
         const tick = () => {
@@ -51,6 +80,19 @@ export default function GameSection() {
         tick();
       });
 
+    const injectCss = () => {
+      if (!scriptSrc) return;
+      const cssHref = scriptSrc.replace(/(\.js)(\?.*)?$/, '.css$2');
+      if (!cssHref) return;
+      const marker = `link[data-vite-game-css="${cssHref}"]`;
+      if (document.querySelector(marker)) return;
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cssHref;
+      link.setAttribute('data-vite-game-css', cssHref);
+      document.head.appendChild(link);
+    };
+
     const injectScript = () =>
       new Promise((resolve, reject) => {
         let s = document.getElementById(ID);
@@ -58,8 +100,8 @@ export default function GameSection() {
 
         s = document.createElement("script");
         s.id = ID;
-        s.src = SRC;
-        s.defer = true; // IIFE classic script
+        s.src = scriptSrc;
+        s.async = true;
         s.onload = () => resolve(true);
         s.onerror = () => reject(new Error("Failed to load embed script"));
         document.body.appendChild(s);
@@ -67,7 +109,10 @@ export default function GameSection() {
 
     (async () => {
       try {
+        console.debug('GameSection mounting Vite game', { scriptSrc });
         setStatus("loading");
+
+        injectCss();
 
         // If global already present (e.g., loaded by shortcode on same page), mount immediately.
         if (tryMountNow()) return;
@@ -91,17 +136,20 @@ export default function GameSection() {
 
   return (
     <>
-      <h2 className="text-2xl mb-4 text-center"></h2>
+      {label && <h2 className="text-2xl mb-2 text-center">{label}</h2>}
+      {debugInfo && (
+        <p className="text-sm text-center text-gray-500 mb-2">{debugInfo}</p>
+      )}
       <div
-        id="vite-game-root"
+        id={ROOT_ID}
         ref={rootRef}
         className="my-8 min-h-[200px] text-center border border-dashed rounded-lg p-4"
       />
       {status !== "mounted" && (
         <p className="text-sm text-center text-gray-500">
-          {status === "loading" && "Loading game…"}
-          {status === "ready" && "Preparing to mount…"}
-          {status === "error" && <>Couldn’t mount. {err}</>}
+          {status === "loading" && "Loading game..."}
+          {status === "ready" && "Preparing to mount..."}
+          {status === "error" && <>Couldn't mount. {err}</>}
         </p>
       )}
     </>

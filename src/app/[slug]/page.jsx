@@ -1,27 +1,26 @@
-// src/app/[slug]/page.jsx
+import GameSectionClient from '@/components/GameSectionClient';
+import {
+  getPageBySlug,
+  getWordSearchFlagValue,
+  hasWordSearchFlag,
+  resolveSlug,
+} from '@/lib/wp';
 
-// import { getPageBySlug } from '../../lib/wp';
-
-
-async function resolveSlug(params) {
-  const paramsObj = await Promise.resolve(params);
-  const raw = paramsObj?.slug;
-  return Array.isArray(raw) ? raw[0] : (raw ?? 'home');
-}
-
-async function getPageBySlug(slug) {
-  try {
-    const res = await fetch(
-      `https://backend.petereichhorst.com/wp-json/wp/v2/pages?slug=${encodeURIComponent(slug)}&_embed`,
-      { cache: 'no-store' }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    return Array.isArray(data) && data.length ? data[0] : null;
-  } catch (err) {
-    console.error('getPageBySlug error', err);
-    return null;
+function formatAcfValue(value) {
+  if (value === undefined) return 'undefined';
+  if (value === null) return 'null';
+  if (typeof value === 'string') return value || '(empty string)';
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
   }
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch (err) {
+      return '[object]';
+    }
+  }
+  return String(value);
 }
 
 export async function generateMetadata(ctx) {
@@ -37,7 +36,9 @@ export async function generateMetadata(ctx) {
   const title =
     rawTitle && rawTitle.includes('Peter Eichhorst')
       ? rawTitle
-      : (rawTitle ? rawTitle + suffix : 'Peter Eichhorst');
+      : rawTitle
+      ? rawTitle + suffix
+      : 'Peter Eichhorst';
 
   const description =
     page?.yoast?.meta_desc ||
@@ -51,18 +52,47 @@ export async function generateMetadata(ctx) {
 }
 
 export default async function Page(ctx) {
-  const slug = await resolveSlug(ctx.params);        // ⬅️ await it
+  const slug = await resolveSlug(ctx.params);
   const page = await getPageBySlug(slug);
 
   if (!page) {
     return <div className="p-8 text-center">Page not found</div>;
   }
 
+  const showWordSearch = hasWordSearchFlag(page);
+  const { key: wordSearchKey, value: wordSearchValue } = getWordSearchFlagValue(page.acf);
+  const formattedValue = formatAcfValue(wordSearchValue);
+  const componentDebugInfo = wordSearchKey
+    ? `ACF ${wordSearchKey}: ${formattedValue}`
+    : 'ACF wordsearch flag not found';
+
+  console.log('Wordsearch flag debug', {
+    slug,
+    showWordSearch,
+    wordSearchKey,
+    wordSearchValue,
+  });
+
   return (
     <main className="container mx-auto px-4 py-8">
+      <h1
+        className="text-4xl font-bold mb-6"
+        dangerouslySetInnerHTML={{ __html: page.title?.rendered || 'Untitled' }}
+      />
       <article
         dangerouslySetInnerHTML={{ __html: page.content?.rendered || '' }}
       />
+      <p className="mt-8 text-sm text-center text-gray-500">
+        {componentDebugInfo} | resolved: {String(showWordSearch)}
+      </p>
+      {showWordSearch && (
+        <section className="mt-6">
+          <GameSectionClient
+            label="Wordsearch Game"
+            debugInfo={componentDebugInfo}
+          />
+        </section>
+      )}
     </main>
   );
 }
