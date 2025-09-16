@@ -1,51 +1,68 @@
-export const dynamic = 'force-dynamic';
+// src/app/[slug]/page.jsx
 
-import Link from 'next/link';
-import GameSection from '@/components/GameSection';
+// import { getPageBySlug } from '../../lib/wp';
 
-async function getPageBySlug(slug) {
-  const res = await fetch(
-    `https://backend.petereichhorst.com/wp-json/wp/v2/pages?slug=${slug}&acf_format=standard`,
-    { next: { revalidate: 60 } }
-  );
-  const data = await res.json();
-  return Array.isArray(data) && data.length > 0 ? data[0] : null;
+
+async function resolveSlug(params) {
+  const paramsObj = await Promise.resolve(params);
+  const raw = paramsObj?.slug;
+  return Array.isArray(raw) ? raw[0] : (raw ?? 'home');
 }
 
-export async function generateMetadata({ params }) {
-  const slug = params?.slug ?? 'home';
+async function getPageBySlug(slug) {
+  try {
+    const res = await fetch(
+      `https://backend.petereichhorst.com/wp-json/wp/v2/pages?slug=${encodeURIComponent(slug)}&_embed`,
+      { cache: 'no-store' }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data) && data.length ? data[0] : null;
+  } catch (err) {
+    console.error('getPageBySlug error', err);
+    return null;
+  }
+}
+
+export async function generateMetadata(ctx) {
+  const slug = await resolveSlug(ctx.params);
   const page = await getPageBySlug(slug);
 
+  const rawTitle =
+    page?.yoast?.title ||
+    page?.title?.rendered ||
+    (slug === 'home' ? 'Home' : slug);
+
+  const suffix = ' | Peter Eichhorst';
   const title =
-    (page?.yoast_head_json?.title || page?.title?.rendered || slug) +
-    ' | Peter Eichhorst';
+    rawTitle && rawTitle.includes('Peter Eichhorst')
+      ? rawTitle
+      : (rawTitle ? rawTitle + suffix : 'Peter Eichhorst');
+
+  const description =
+    page?.yoast?.meta_desc ||
+    page?.excerpt?.rendered?.replace(/<[^>]+>/g, '') ||
+    '';
 
   return {
     title,
-    description:
-      page?.yoast_head_json?.description || page?.excerpt?.rendered || '',
+    description,
   };
 }
 
-export default async function Page({ params }) {
-  const slug = params?.slug ?? 'home';
+export default async function Page(ctx) {
+  const slug = await resolveSlug(ctx.params);        // ⬅️ await it
   const page = await getPageBySlug(slug);
-  if (!page) return <div className="p-8 text-center">Page not found</div>;
 
-  const showGame = !!Number(page?.acf?.show_vite_game);
+  if (!page) {
+    return <div className="p-8 text-center">Page not found</div>;
+  }
 
   return (
-    <>
-    
-      <div className="min-h-screen- relative">
-        <h1 className="text-3xl font-bold mb-6">{page.title.rendered}</h1>
-        <Link href="/contact" className="text-blue-600 underline"></Link>
-        <div className="prose max-w-none text-black dark:text-white">
-          <div dangerouslySetInnerHTML={{ __html: page.content.rendered }} />
-        </div>
-      </div>
-
-      {showGame && <GameSection />}
-    </>
+    <main className="container mx-auto px-4 py-8">
+      <article
+        dangerouslySetInnerHTML={{ __html: page.content?.rendered || '' }}
+      />
+    </main>
   );
 }

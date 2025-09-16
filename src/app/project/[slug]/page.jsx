@@ -4,19 +4,14 @@ export const dynamic = 'force-dynamic';
 
 import { getMetadata } from '@/lib/getMetadata';
 
+import { resolveSlug, getPageBySlug } from '@/lib/wp';
+
+
 export async function generateMetadata({ params }) {
   const slug = params?.slug || 'home'; // ✅ No await needed
   return await getMetadata(slug, 'project');
 }
 
-async function getPageBySlug(slug) {
-  const res = await fetch(
-    `https://backend.petereichhorst.com/wp-json/wp/v2/project?slug=${slug}&acf_format=standard&_embed`,
-    { next: { revalidate: 60 } }
-  );
-  const data = await res.json();
-  return Array.isArray(data) && data.length > 0 ? data[0] : null;
-}
 
 export default async function Page({ params }) {
   const slug = params?.slug || 'home'; // ✅ No await
