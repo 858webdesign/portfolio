@@ -31,7 +31,7 @@ export default function Hero() {
 
         <p className="mt-6 text-lg md:text-xl text-white/90">
           We design and build websites, apps, and digital products that stand
-          out and deliver results.
+          out and deliver long term results.
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
