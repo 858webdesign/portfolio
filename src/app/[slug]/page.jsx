@@ -1,27 +1,9 @@
 import GameSectionClient from '@/components/GameSectionClient';
 import {
   getPageBySlug,
-  getWordSearchFlagValue,
   hasWordSearchFlag,
   resolveSlug,
 } from '@/lib/wp';
-
-function formatAcfValue(value) {
-  if (value === undefined) return 'undefined';
-  if (value === null) return 'null';
-  if (typeof value === 'string') return value || '(empty string)';
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return String(value);
-  }
-  if (typeof value === 'object') {
-    try {
-      return JSON.stringify(value);
-    } catch (err) {
-      return '[object]';
-    }
-  }
-  return String(value);
-}
 
 export async function generateMetadata(ctx) {
   const slug = await resolveSlug(ctx.params);
@@ -60,18 +42,6 @@ export default async function Page(ctx) {
   }
 
   const showWordSearch = hasWordSearchFlag(page);
-  const { key: wordSearchKey, value: wordSearchValue } = getWordSearchFlagValue(page.acf);
-  const formattedValue = formatAcfValue(wordSearchValue);
-  const componentDebugInfo = wordSearchKey
-    ? `ACF ${wordSearchKey}: ${formattedValue}`
-    : 'ACF wordsearch flag not found';
-
-  console.log('Wordsearch flag debug', {
-    slug,
-    showWordSearch,
-    wordSearchKey,
-    wordSearchValue,
-  });
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -82,15 +52,9 @@ export default async function Page(ctx) {
       <article
         dangerouslySetInnerHTML={{ __html: page.content?.rendered || '' }}
       />
-      <p className="mt-8 text-sm text-center text-gray-500">
-        {componentDebugInfo} | resolved: {String(showWordSearch)}
-      </p>
       {showWordSearch && (
         <section className="mt-6">
-          <GameSectionClient
-            label="Wordsearch Game"
-            debugInfo={componentDebugInfo}
-          />
+          <GameSectionClient label="Wordsearch Game" />
         </section>
       )}
     </main>

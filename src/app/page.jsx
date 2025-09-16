@@ -1,73 +1,21 @@
 import Link from 'next/link';
 import { getMetadata } from '@/lib/getMetadata';
 
-import { resolveSlug, getPageBySlug } from '@/lib/wp';
+export const dynamic = 'force-dynamic';
 
-// ...existing code...
-export async function Page(ctx) {
-    const slug = await resolveSlug(ctx.params);        // ⬅️ await it
-    const page = await getPageBySlug(slug);
-
-    if (!page) {
-      return <div className="p-8 text-center">Page not found</div>;
-    }
-
-    return (
-      <main className="container mx-auto px-4 py-8">
-        {/* show the page title */}
-        <h1
-          className="text-4xl font-bold mb-6"
-          dangerouslySetInnerHTML={{ __html: page.title?.rendered || 'Untitled' }}
-        />
-
-        <article
-          dangerouslySetInnerHTML={{ __html: page.content?.rendered || '' }}
-        />
-      </main>
-    );
-  }
-// ...existing code...
-
-export async function generateMetadata(ctx) {
-  const slug = await resolveSlug(ctx.params);
-  const page = await getPageBySlug(slug);
-
-  const rawTitle =
-    page?.yoast?.title ||
-    page?.title?.rendered ||
-    (slug === 'home' ? 'Home' : slug);
-
-  const suffix = ' | Peter Eichhorst';
-  const title =
-    rawTitle && rawTitle.includes('Peter Eichhorst')
-      ? rawTitle
-      : (rawTitle ? rawTitle + suffix : 'Peter Eichhorst');
-
-  const description =
-    page?.yoast?.meta_desc ||
-    page?.excerpt?.rendered?.replace(/<[^>]+>/g, '') ||
-    '';
-
-  return {
-    title,
-    description,
-  };
+export async function generateMetadata() {
+  return getMetadata('home');
 }
-
-
-
 
 async function getProjects() {
   const res = await fetch(
     'https://backend.petereichhorst.com/wp-json/wp/v2/project?_embed&per_page=50',
-    { cache: 'no-store' } // disables Next.js caching
+    { cache: 'no-store' }
   );
 
   if (!res.ok) throw new Error('Failed to fetch projects');
   return res.json();
 }
-
-
 
 function getScreenshotUrl(siteUrl) {
   const base = 'https://shot.screenshotapi.net/screenshot';
@@ -76,11 +24,9 @@ function getScreenshotUrl(siteUrl) {
 }
 
 function getRandomFallbackImage() {
-  // Returns a random 600x400 image
   const randomId = Math.floor(Math.random() * 1000);
   return `https://picsum.photos/seed/${randomId}/600/700`;
 }
-
 
 export default async function HomePage() {
   const projects = await getProjects();
@@ -109,10 +55,7 @@ export default async function HomePage() {
         }
       `}</style>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center text-black"
-      
-      
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center text-black">
         {projects.map((project) => {
           const featuredImage = project._embedded?.['wp:featuredmedia']?.[0]?.source_url;
           const projectUrl = project.acf?.url || project.meta?.url;
@@ -126,10 +69,7 @@ export default async function HomePage() {
               prefetch={false}
               className="block border rounded-lg overflow-hidden hover:shadow-lg transition duration-300 bg-white"
             >
-              <div className="scroll-container"
-             
-              
-              >
+              <div className="scroll-container">
                 <img
                   src={previewImage}
                   alt={project.title.rendered}
@@ -137,9 +77,7 @@ export default async function HomePage() {
                 />
               </div>
 
-              <div className="p-4"
-               style={{ background: 'var(--color-accent)'}}
-              >
+              <div className="p-4" style={{ background: 'var(--color-accent)' }}>
                 <h2
                   className="text-xl font-semibold"
                   style={{ color: 'var(--color-text)' }}
