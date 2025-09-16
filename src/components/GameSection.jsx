@@ -135,15 +135,11 @@ export default function GameSection({
   }, []);
 
   return (
-    <>
-      {label && <h2 className="text-2xl mb-2 text-center">{label}</h2>}
-      {debugInfo && (
-        <p className="text-sm text-center text-gray-500 mb-2">{debugInfo}</p>
-      )}
+    <>        
       <div
         id={ROOT_ID}
         ref={rootRef}
-        className="my-8 min-h-[200px] text-center border border-dashed rounded-lg p-4"
+        className=""
       />
       {status !== "mounted" && (
         <p className="text-sm text-center text-gray-500">
