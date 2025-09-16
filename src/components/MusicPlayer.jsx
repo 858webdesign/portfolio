@@ -3,19 +3,19 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 
-const PLAYLIST = [
-  'https://backend.petereichhorst.com/audio/Esoteric.mp3',
-  'https://backend.petereichhorst.com/audio/Relax.mp3',
-  'https://backend.petereichhorst.com/audio/Grooving.mp3',
-  'https://backend.petereichhorst.com/audio/Nostalgic.mp3',
-];
-
 const titleFromUrl = (url) => {
-  try { return decodeURIComponent(url.split('/').pop().replace(/\.mp3$/i, '')); }
-  catch { return url; }
+  try {
+    const name = url.split('/').pop() || '';
+    return decodeURIComponent(name.replace(/\.(mp3|m4a|ogg|wav)$/i, ''));
+  } catch {
+    return url;
+  }
 };
 
 export default function MusicPlayer() {
+  // dynamic playlist from API
+  const [playlist, setPlaylist] = useState([]);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [volume, setVolume] = useState(-6); // dB
@@ -26,9 +26,9 @@ export default function MusicPlayer() {
   const player = useRef(null);
   const gainNode = useRef(null);
 
-  // ---- refs to avoid stale closures in RAF ----
+  // refs to avoid stale closures
   const isPlayingRef = useRef(false);
-  const durationRef  = useRef(0);
+  const durationRef = useRef(0);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
   useEffect(() => { durationRef.current = duration; }, [duration]);
 
@@ -60,12 +60,11 @@ export default function MusicPlayer() {
 
       // Fallback auto-advance
       if (isPlayingRef.current && dur > 0 && pos >= dur - 0.05) {
-        // next track
         setIsPlaying(false);
         isPlayingRef.current = false;
         cancelAnimationFrame(rafRef.current);
         autoplayNextRef.current = true;
-        setActiveTrackIndex((i) => (i + 1) % PLAYLIST.length);
+        setActiveTrackIndex((i) => (i + 1) % playlist.length);
         return;
       }
       rafRef.current = requestAnimationFrame(tick);
@@ -104,13 +103,17 @@ export default function MusicPlayer() {
     durationRef.current = dur;
 
     newPlayer.onstop = () => {
-      const endedNaturally = !manualStopRef.current && durationRef.current > 0 && getPosition() >= durationRef.current - 0.1;
+      const endedNaturally =
+        !manualStopRef.current &&
+        durationRef.current > 0 &&
+        getPosition() >= durationRef.current - 0.1;
+
       if (endedNaturally) {
         setIsPlaying(false);
         isPlayingRef.current = false;
         stopRaf();
         autoplayNextRef.current = true;
-        setActiveTrackIndex((i) => (i + 1) % PLAYLIST.length);
+        setActiveTrackIndex((i) => (i + 1) % playlist.length);
       }
       manualStopRef.current = false;
     };
@@ -131,11 +134,9 @@ export default function MusicPlayer() {
     autoplayNextRef.current = false;
   };
 
-  // init
+  // 1) create gain node once
   useEffect(() => {
     gainNode.current = new Tone.Volume(volume).toDestination();
-    if (PLAYLIST.length > 0) loadAndPrepareTrack(PLAYLIST[activeTrackIndex]);
-
     return () => {
       stopRaf();
       if (player.current) {
@@ -148,9 +149,34 @@ export default function MusicPlayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // track change
+  // 2) fetch playlist on mount
   useEffect(() => {
-    if (PLAYLIST.length > 0) loadAndPrepareTrack(PLAYLIST[activeTrackIndex]);
+    (async () => {
+      try {
+        const res = await fetch(
+          'https://backend.petereichhorst.com/wp-json/audio/v1/list?sort=mtime_desc'
+        );
+        const data = await res.json(); // [{url, name, ...}]
+        const urls = (Array.isArray(data) ? data : []).map((item) => item.url);
+        setPlaylist(urls);
+        if (urls.length > 0) setActiveTrackIndex(0);
+      } catch (e) {
+        console.error('Failed to load playlist', e);
+      }
+    })();
+  }, []);
+
+  // 3) when playlist arrives (or changes), load current track
+  useEffect(() => {
+    if (playlist.length > 0 && gainNode.current) {
+      loadAndPrepareTrack(playlist[activeTrackIndex]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playlist]);
+
+  // 4) when activeTrackIndex changes, load that track
+  useEffect(() => {
+    if (playlist.length > 0) loadAndPrepareTrack(playlist[activeTrackIndex]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTrackIndex]);
 
@@ -182,19 +208,21 @@ export default function MusicPlayer() {
   };
 
   const handleNextTrack = () => {
+    if (!playlist.length) return;
     setIsPlaying(false);
     isPlayingRef.current = false;
     stopRaf();
     autoplayNextRef.current = true;
-    setActiveTrackIndex((i) => (i + 1) % PLAYLIST.length);
+    setActiveTrackIndex((i) => (i + 1) % playlist.length);
   };
 
   const handlePreviousTrack = () => {
+    if (!playlist.length) return;
     setIsPlaying(false);
     isPlayingRef.current = false;
     stopRaf();
     autoplayNextRef.current = true;
-    setActiveTrackIndex((i) => (i - 1 + PLAYLIST.length) % PLAYLIST.length);
+    setActiveTrackIndex((i) => (i - 1 + playlist.length) % playlist.length);
   };
 
   const handlePickTrack = (index) => {
@@ -236,12 +264,13 @@ export default function MusicPlayer() {
     return `${m}:${ss.toString().padStart(2, '0')}`;
   };
 
-  const activeTitle = titleFromUrl(PLAYLIST[activeTrackIndex] || '');
+  const activeUrl = playlist[activeTrackIndex] || '';
+  const activeTitle = titleFromUrl(activeUrl);
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <div
-        className="flex flex-col items-center gap-4 p-5 rounded-2xl shadow-2xl backdrop-blur-md max-w-[92vw]"
+        className="flex flex-col items-center gap-3 p-2 rounded-2xl shadow-2xl backdrop-blur-md max-w-[52vw]"
         style={{
           background: 'rgba(var(--color-bg-dark-rgb), 0.7)',
           border: '1px solid rgba(var(--color-accent-rgb), 0.2)',
@@ -250,7 +279,7 @@ export default function MusicPlayer() {
       >
         {/* Active title */}
         <span className="font-bold text-lg text-center opacity-80 px-3">
-          {activeTitle || 'Loading...'}
+          {playlist.length ? activeTitle : 'Loading...'}
         </span>
 
         {/* Controls */}
@@ -259,7 +288,7 @@ export default function MusicPlayer() {
             onClick={handlePreviousTrack}
             className="w-10 h-10 flex items-center justify-center rounded-full transition-all hover:opacity-80"
             style={{ background: 'rgba(var(--color-accent-rgb), 0.1)', color: 'var(--color-text)' }}
-            disabled={!isLoaded}
+            disabled={!isLoaded || !playlist.length}
             aria-label="Previous"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -273,7 +302,7 @@ export default function MusicPlayer() {
               isPlaying ? 'animate-pulse' : 'hover:scale-110'
             }`}
             style={{ background: 'var(--color-accent)', color: 'var(--color-bg-dark)' }}
-            disabled={!isLoaded}
+            disabled={!isLoaded || !playlist.length}
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isLoaded ? (
@@ -297,7 +326,7 @@ export default function MusicPlayer() {
             onClick={handleNextTrack}
             className="w-10 h-10 flex items-center justify-center rounded-full transition-all hover:opacity-80"
             style={{ background: 'rgba(var(--color-accent-rgb), 0.1)', color: 'var(--color-text)' }}
-            disabled={!isLoaded}
+            disabled={!isLoaded || !playlist.length}
             aria-label="Next"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -324,10 +353,10 @@ export default function MusicPlayer() {
           <span className="text-[11px] opacity-70 w-10">{fmt(duration)}</span>
         </div>
 
-        {/* Centered inline playlist */}
+        {/* Playlist */}
         <div className="w-full" title="Playlist" aria-label="Playlist">
           <div className="flex flex-wrap justify-center items-center gap-2">
-            {PLAYLIST.map((url, idx) => {
+            {playlist.map((url, idx) => {
               const label = titleFromUrl(url);
               const isActive = idx === activeTrackIndex;
               return (
@@ -352,7 +381,7 @@ export default function MusicPlayer() {
           </div>
         </div>
 
-        {/* Volume with icon */}
+        {/* Volume */}
         <div className="w-full flex items-center gap-2">
           <span aria-hidden className="inline-flex items-center justify-center w-5 h-5 opacity-75">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

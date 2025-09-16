@@ -1,38 +1,60 @@
+// ViteGameLoader.jsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
-export default function ViteGameLoader() {
+export default function ViteGameLoader({
+  jsSrc = 'https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist-embed/embed-games.js',
+  cssHref = 'https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist-embed/embed-games.css',
+  className = 'my-8',
+}) {
+  const rootRef = useRef(null);
+
   useEffect(() => {
-    const mountWhenReady = () => {
-      const el = document.getElementById('vite-game-root');
-      if (!el || el.dataset.mounted) return;
+    const el = rootRef.current;
+    if (!el || el.dataset.mounted === 'true') return;
 
-      const tryMount = () => {
-        if (window.__vite_game_mount__) {
-          window.__vite_game_mount__();
+    // inject CSS once
+    if (cssHref && !document.querySelector(`link[data-vite-game-css="${cssHref}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cssHref;
+      link.setAttribute('data-vite-game-css', cssHref);
+      document.head.appendChild(link);
+    }
+
+    // load script once (memoize a promise on window)
+    if (!window.__viteGameScriptPromise) {
+      window.__viteGameScriptPromise = new Promise((resolve, reject) => {
+        if (window.ViteGame?.mount) return resolve();
+        const existing = document.querySelector(`script[data-vite-game-js="${jsSrc}"]`);
+        if (existing) {
+          existing.addEventListener('load', () => resolve());
+          existing.addEventListener('error', () => reject(new Error('ViteGame script error')));
+        } else {
+          const s = document.createElement('script');
+          s.src = jsSrc;
+          s.async = true;
+          s.setAttribute('data-vite-game-js', jsSrc);
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error('ViteGame script error'));
+          document.body.appendChild(s);
+        }
+      });
+    }
+
+    window.__viteGameScriptPromise
+      .then(() => {
+        const api = window.ViteGame;
+        if (api?.mount) {
+          api.mount(el); // pass element
           el.dataset.mounted = 'true';
         } else {
-          setTimeout(tryMount, 50); // Retry until it's defined
+          console.warn('ViteGame.mount not found');
         }
-      };
+      })
+      .catch(console.error);
+  }, [jsSrc, cssHref]);
 
-      tryMount();
-    };
-
-    const existingScript = document.getElementById('vite-game-script');
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.src =
-        'https://backend.petereichhorst.com/wp-content/plugins/headless-frontend/react/games/dist/assets/embed-games.js';
-      script.id = 'vite-game-script';
-      script.defer = true;
-      script.onload = mountWhenReady;
-      document.body.appendChild(script);
-    } else {
-      mountWhenReady();
-    }
-  }, []);
-
-  return <div id="vite-game-root" className="my-8" />;
+  return <div ref={rootRef} className={className} />;
 }

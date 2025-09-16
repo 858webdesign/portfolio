@@ -65,7 +65,7 @@ export default function Header({ theme }) {
 
         {/* Mobile Hamburger */}
         <button
-          className="md:hidden text-[var(--color-text)]"
+          className="rounded-2xl md:hidden p-3  text-[var(--color-bg-dark)] bg-[var(--color-accent)]"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
